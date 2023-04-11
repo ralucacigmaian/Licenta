@@ -17,7 +17,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import Input from "../components/Input";
 import Interest from "../components/Interest";
-import { useContext, useEffect, useLayoutEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Icon, { Icons } from "../components/Icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Interests } from "../utils/interests";
@@ -30,7 +30,6 @@ import {
   deleteFriend,
 } from "../database/database";
 import { UserContext } from "../context/AuthContext";
-import { async } from "@firebase/util";
 
 function DisplayFriendsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -188,6 +187,21 @@ function DisplayFriendsScreen() {
     };
     fetchFriends();
   }, [userId, numberOfFriends]);
+
+  // View Friend Profile
+
+  const [modalProfileVisible, setModalProfileVisible] = useState(false);
+  const [currentFriendId, setCurrentFriendId] = useState(null);
+  const [currentFriend, setCurrentFriend] = useState(null);
+
+  const handleViewProfile = (friendId) => {
+    setModalProfileVisible(true);
+    setCurrentFriendId(friendId);
+    setCurrentFriend(
+      retrievedArray.find((currentFriend) => currentFriend.key === friendId)
+    );
+  };
+  // console.log(currentFriend);
 
   // Delete information from database
 
@@ -472,6 +486,75 @@ function DisplayFriendsScreen() {
               </View>
             </SafeAreaView>
           </Modal>
+          {currentFriendId ? (
+            <Modal
+              visible={modalProfileVisible}
+              transparent={true}
+              animationType="fade"
+            >
+              <SafeAreaView style={styles.modalContainer}>
+                <Pressable onPress={() => setModalProfileVisible(false)}>
+                  <View style={styles.modalViewProfile}>
+                    <View style={styles.profileImageContainer}>
+                      <Image
+                        source={{ uri: currentFriend.image }}
+                        style={styles.profileImage}
+                      />
+                    </View>
+                    <View style={styles.profileNameContainer}>
+                      <Text style={styles.textProfileName}>
+                        {currentFriend.name}
+                      </Text>
+                    </View>
+                    <View style={styles.profileInformationContainer}>
+                      <View style={styles.profileInformation}>
+                        <Text style={styles.textInformation}>
+                          {currentFriend.birthday}
+                        </Text>
+                        <Text style={styles.textDescriptionInformation}>
+                          Birthday
+                        </Text>
+                      </View>
+                      <View style={styles.profileInformation}>
+                        <Text
+                          style={[
+                            styles.textInformation,
+                            { textTransform: "capitalize" },
+                          ]}
+                        >
+                          {currentFriend.gender}
+                        </Text>
+                        <Text style={styles.textDescriptionInformation}>
+                          Gender
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.profileInterestsContainer}>
+                      {currentFriend.interests.map((x) => {
+                        const interestObj = Interests.find(
+                          (obj) => obj.id === x
+                        );
+                        return (
+                          <View style={styles.profileInterest}>
+                            <Interest
+                              key={interestObj.id}
+                              style={styles.textInterest}
+                              active={true}
+                            >
+                              {interestObj.title}
+                            </Interest>
+                          </View>
+                        );
+                      })}
+                    </View>
+                    {/* <Button onPress={() => setModalProfileVisible(false)}>
+                    close
+                  </Button> */}
+                  </View>
+                </Pressable>
+              </SafeAreaView>
+            </Modal>
+          ) : null}
           <Button
             backgroundColor={Colors.colors.darkDustyPurple}
             color="white"
@@ -492,6 +575,7 @@ function DisplayFriendsScreen() {
                   name={x.name}
                   date={x.birthday}
                   image={x.image}
+                  onViewProfile={handleViewProfile}
                   onDelete={handleDeleteFriend}
                 />
               </View>
@@ -663,6 +747,83 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: "red",
+  },
+  modalViewProfile: {
+    flex: 0,
+    margin: 16,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 16,
+    alignItems: "center",
+    // flexDirection: "column",
+  },
+  profileImageContainer: {
+    height: 160,
+    width: 160,
+    borderRadius: 160,
+    backgroundColor: "white",
+    position: "absolute",
+    alignSelf: "center",
+    marginTop: -80,
+  },
+  profileImage: {
+    height: 160,
+    width: 160,
+    borderRadius: 160,
+  },
+  profileNameContainer: {
+    marginTop: 70,
+  },
+  textProfileName: {
+    fontFamily: "Montserrat-Regular",
+    fontSize: 20,
+    color: Colors.colors.darkDustyPurple,
+  },
+  profileInformationContainer: {
+    backgroundColor: Colors.colors.cardBackgroundColor,
+    height: 50,
+    width: "70%",
+    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginTop: 10,
+  },
+  profileInformation: {
+    justifyContent: "center",
+  },
+  textInformation: {
+    fontFamily: "Montserrat-ThinItalic",
+    fontSize: 16,
+    color: Colors.colors.darkDustyPurple,
+    textAlign: "center",
+  },
+  textDescriptionInformation: {
+    fontFamily: "Montserrat-Regular",
+    fontSize: 10,
+    textTransform: "uppercase",
+    color: Colors.colors.darkDustyPurple,
+    textAlign: "center",
+  },
+  profileInterestsContainer: {
+    backgroundColor: Colors.colors.cardBackgroundColor,
+    width: "95%",
+    borderRadius: 10,
+    marginTop: 10,
+    marginBottom: 10,
+    flexWrap: "wrap",
+    flexDirection: "row",
+    justifyContent: "center",
+    flex: 0,
+  },
+  profileInterest: {
+    margin: 1,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  textInterest: {
+    fontFamily: "Montserrat-Regular",
+    fontSize: 14,
+    color: Colors.colors.darkDustyPurple,
   },
 });
 
