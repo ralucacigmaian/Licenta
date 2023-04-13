@@ -455,57 +455,6 @@ function DisplayFriendsScreen() {
                         </View>
                       ))}
                     </ScrollView>
-                    <ScrollView
-                      horizontal={true}
-                      showsHorizontalScrollIndicator={false}
-                      style={styles.interestsContainer}
-                    >
-                      {Interests.slice(29, 39).map((x) => (
-                        <View style={styles.interest}>
-                          <Interest
-                            key={x.id}
-                            onPress={() => handleSelectInterests(x.id)}
-                            active={selectedInterests.includes(x.id)}
-                          >
-                            {x.title}
-                          </Interest>
-                        </View>
-                      ))}
-                    </ScrollView>
-                    <ScrollView
-                      horizontal={true}
-                      showsHorizontalScrollIndicator={false}
-                      style={styles.interestsContainer}
-                    >
-                      {Interests.slice(39, 49).map((x) => (
-                        <View style={styles.interest}>
-                          <Interest
-                            key={x.id}
-                            onPress={() => handleSelectInterests(x.id)}
-                            active={selectedInterests.includes(x.id)}
-                          >
-                            {x.title}
-                          </Interest>
-                        </View>
-                      ))}
-                    </ScrollView>
-                    <ScrollView
-                      horizontal={true}
-                      showsHorizontalScrollIndicator={false}
-                      style={styles.interestsContainer}
-                    >
-                      {Interests.slice(49, 54).map((x) => (
-                        <View style={styles.interest}>
-                          <Interest
-                            key={x.id}
-                            onPress={() => handleSelectInterests(x.id)}
-                            active={selectedInterests.includes(x.id)}
-                          >
-                            {x.title}
-                          </Interest>
-                        </View>
-                      ))}
-                    </ScrollView>
                   </View>
                 </View>
                 <View style={styles.imageContainer}>
@@ -726,60 +675,6 @@ function DisplayFriendsScreen() {
                           </View>
                         ))}
                       </ScrollView>
-                      <ScrollView
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        // style={styles.interestsContainer}
-                      >
-                        {Interests.slice(29, 39).map((x) => (
-                          <View style={styles.profileInterest}>
-                            <Interest
-                              key={x.id}
-                              onPress={() => handleEditSelectedInterests(x.id)}
-                              active={newInterests.includes(x.id)}
-                              style={styles.textInterest}
-                            >
-                              {x.title}
-                            </Interest>
-                          </View>
-                        ))}
-                      </ScrollView>
-                      <ScrollView
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        // style={styles.interestsContainer}
-                      >
-                        {Interests.slice(39, 49).map((x) => (
-                          <View style={styles.profileInterest}>
-                            <Interest
-                              key={x.id}
-                              onPress={() => handleEditSelectedInterests(x.id)}
-                              active={newInterests.includes(x.id)}
-                              style={styles.textInterest}
-                            >
-                              {x.title}
-                            </Interest>
-                          </View>
-                        ))}
-                      </ScrollView>
-                      <ScrollView
-                        horizontal={true}
-                        showsHorizontalScrollIndicator={false}
-                        // style={styles.interestsContainer}
-                      >
-                        {Interests.slice(49, 54).map((x) => (
-                          <View style={styles.profileInterest}>
-                            <Interest
-                              key={x.id}
-                              onPress={() => handleEditSelectedInterests(x.id)}
-                              active={newInterests.includes(x.id)}
-                              style={styles.textInterest}
-                            >
-                              {x.title}
-                            </Interest>
-                          </View>
-                        ))}
-                      </ScrollView>
                     </View>
                     {newInterests.length < 5 ? (
                       <Text style={styles.errorEditInterests}>
@@ -921,8 +816,9 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   horizontalContainer: {
-    height: 210,
+    height: 100,
     marginTop: 4,
+    // flex: 0,
     // flexDirection: "column",
   },
   interestsTextContainer: {
@@ -1099,6 +995,7 @@ const styles = StyleSheet.create({
   errorEditInterests: {
     fontFamily: "Montserrat-Regular",
     fontSize: 16,
+    marginBottom: 8,
     color: Colors.colors.darkDustyPurple,
   },
 });
