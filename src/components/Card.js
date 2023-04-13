@@ -2,7 +2,16 @@ import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { Colors } from "../utils/colors";
 import Icon, { Icons } from "./Icons";
 
-function Card({ id, name, date, image, onViewProfile, onDelete }) {
+function Card({
+  id,
+  name,
+  date,
+  image,
+  onViewProfile,
+  onEdit,
+  onDelete,
+  onPress,
+}) {
   // Get how many days are left until the next birthday
 
   const birthdate = new Date(date);
@@ -37,7 +46,9 @@ function Card({ id, name, date, image, onViewProfile, onDelete }) {
         <View style={styles.buttonsContainer}>
           <View style={styles.viewProfile}>
             <Pressable
-              onPress={() => onViewProfile(id)}
+              onPress={() => {
+                onViewProfile(id), onPress(id);
+              }}
               style={({ pressed }) => pressed && styles.pressed}
             >
               <Icon
@@ -59,7 +70,12 @@ function Card({ id, name, date, image, onViewProfile, onDelete }) {
             </Pressable>
           </View>
           <View style={styles.editProfile}>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
+            <Pressable
+              onPress={() => {
+                onEdit(id), onPress(id);
+              }}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
               <Icon
                 type={Icons.Ionicons}
                 name="create"

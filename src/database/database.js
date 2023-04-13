@@ -1,5 +1,6 @@
 import axios from "axios";
 import { initializeApp } from "firebase/app";
+import { get } from "firebase/database";
 import {
   ref,
   uploadBytes,
@@ -36,6 +37,14 @@ export async function deleteFriend(userId, friendId, formattedPath) {
   await deleteImage(formattedPath);
   const response = await axios.delete(
     URL + `/users/${userId}/friends/${friendId}.json`
+  );
+  return response.data;
+}
+
+export async function editFriend(userId, friendId, friendData) {
+  const response = await axios.patch(
+    URL + `/users/${userId}/friends/${friendId}.json`,
+    friendData
   );
   return response.data;
 }
@@ -92,4 +101,25 @@ export async function addImage(path, formattedPath) {
 export async function deleteImage(formattedPath) {
   const imageRef = ref(storage, formattedPath);
   await deleteObject(imageRef);
+}
+
+export async function editImage(path, newPath) {
+  const imageRef = ref(storage, path);
+  const blob = await new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      resolve(xhr.response);
+    };
+    xhr.onerror = function (e) {
+      console.log(e);
+      reject(new TypeError("Network request failed"));
+    };
+    xhr.responseType = "blob";
+    xhr.open("GET", newPath, true);
+    xhr.send(null);
+  });
+  const snap = await uploadBytes(imageRef, blob);
+  console.log(snap);
+  blob.close();
+  return snap;
 }

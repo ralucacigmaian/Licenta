@@ -28,8 +28,11 @@ import {
   addImage,
   getUsersFriend,
   deleteFriend,
+  editImage,
+  editFriend,
 } from "../database/database";
 import { UserContext } from "../context/AuthContext";
+import { async } from "@firebase/util";
 
 function DisplayFriendsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -42,11 +45,12 @@ function DisplayFriendsScreen() {
   // Inputs
 
   const [gender, setGender] = useState(GENDER.FEMALE);
-  const [name, setName] = useState("");
+  const [name, setName] = useState(null);
   const [birthday, setBirthday] = useState("Select your friend's birthday");
   const [selectedInterests, setSelectedInterests] = useState([]);
-  const [photo, setPhoto] = useState(null);
+  const [photo, setPhoto] = useState();
   const [submitted, setSubmitted] = useState(false);
+  const [selectedFriendId, setSelectedFriendId] = useState(null);
   const authenticatedUser = useContext(UserContext);
   let userId = authenticatedUser.uid;
 
@@ -218,6 +222,65 @@ function DisplayFriendsScreen() {
   };
 
   // Edit information from database
+
+  const [modalEditProfileVisible, setModalEditProfileVisible] = useState(false);
+  const [editSelectedInterests, setEditSelectedInterests] = useState([]);
+  const [newInterests, setNewInterests] = useState([]);
+  let aux = [];
+
+  const handleEditProfile = (friendId) => {
+    setModalEditProfileVisible(true);
+    setCurrentFriendId(friendId);
+    setCurrentFriend(
+      retrievedArray.find((currentFriend) => currentFriend.key === friendId)
+    );
+  };
+
+  useEffect(() => {
+    if (selectedFriendId) {
+      setCurrentFriend(
+        retrievedArray.find(
+          (currentFriend) => currentFriend.key === selectedFriendId
+        )
+      );
+      if (currentFriend) {
+        setEditSelectedInterests(currentFriend.interests);
+        setNewInterests(currentFriend.interests);
+      }
+    }
+    console.log(selectedFriendId);
+    // console.log(currentFriend.interests);
+  }, [selectedFriendId]);
+
+  const handleEditSelectedInterests = (id) => {
+    if (newInterests.includes(id)) {
+      setNewInterests(newInterests.filter((i) => i !== id));
+    } else {
+      setNewInterests([...newInterests, id]);
+    }
+  };
+
+  const submitEditProfile = async () => {
+    try {
+      const newImagePath = `friends/${userId}/${currentFriendId}.jpeg`;
+      if (photo) {
+        const response = await addImage(photo, newImagePath);
+      }
+      if (newInterests.length >= 5) {
+        const reponnseInterests = await editFriend(userId, selectedFriendId, {
+          gender: currentFriend.gender,
+          name: currentFriend.name.name,
+          birthday: currentFriend.birthday,
+          interests: newInterests,
+        });
+      }
+      setNumberOfFriends((prevNumber) => prevNumber + 1);
+      setModalEditProfileVisible(false);
+      setPhoto();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <ScrollView bounces={false} style={styles.container}>
@@ -555,6 +618,187 @@ function DisplayFriendsScreen() {
               </SafeAreaView>
             </Modal>
           ) : null}
+          {currentFriendId ? (
+            <Modal
+              visible={modalEditProfileVisible}
+              transparent={true}
+              animationType="fade"
+            >
+              <SafeAreaView style={styles.modalContainer}>
+                <Pressable onPress={() => setModalEditProfileVisible(false)}>
+                  <View style={styles.modalViewProfile}>
+                    <View style={styles.profileImageContainer}>
+                      <Image
+                        source={{ uri: photo ? photo : currentFriend.image }}
+                        style={styles.profileImage}
+                      />
+                      <Pressable onPress={() => handleSelectImage()}>
+                        <View style={styles.editButtonContainer}>
+                          <Icon
+                            type={Icons.Feather}
+                            name="edit-2"
+                            size={18}
+                            color="white"
+                          />
+                        </View>
+                      </Pressable>
+                    </View>
+                    <View style={styles.profileNameContainer}>
+                      <Text style={styles.textProfileName}>
+                        {currentFriend.name}
+                      </Text>
+                    </View>
+                    <View style={styles.profileInformationContainer}>
+                      <View style={styles.profileInformation}>
+                        <Text style={styles.textInformation}>
+                          {currentFriend.birthday}
+                        </Text>
+                        <Text style={styles.textDescriptionInformation}>
+                          Birthday
+                        </Text>
+                      </View>
+                      <View style={styles.profileInformation}>
+                        <Text
+                          style={[
+                            styles.textInformation,
+                            { textTransform: "capitalize" },
+                          ]}
+                        >
+                          {currentFriend.gender}
+                        </Text>
+                        <Text style={styles.textDescriptionInformation}>
+                          Gender
+                        </Text>
+                      </View>
+                    </View>
+                    <View style={styles.editInterestsContainer}>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        // style={styles.interestsContainer}
+                      >
+                        {Interests.slice(0, 9).map((x) => (
+                          <View style={styles.profileInterest}>
+                            <Interest
+                              key={x.id}
+                              onPress={() => handleEditSelectedInterests(x.id)}
+                              active={newInterests.includes(x.id)}
+                              style={styles.textInterest}
+                            >
+                              {x.title}
+                            </Interest>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        // style={styles.interestsContainer}
+                      >
+                        {Interests.slice(9, 19).map((x) => (
+                          <View style={styles.profileInterest}>
+                            <Interest
+                              key={x.id}
+                              onPress={() => handleEditSelectedInterests(x.id)}
+                              active={newInterests.includes(x.id)}
+                              style={styles.textInterest}
+                            >
+                              {x.title}
+                            </Interest>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        // style={styles.interestsContainer}
+                      >
+                        {Interests.slice(19, 29).map((x) => (
+                          <View style={styles.profileInterest}>
+                            <Interest
+                              key={x.id}
+                              onPress={() => handleEditSelectedInterests(x.id)}
+                              active={newInterests.includes(x.id)}
+                              style={styles.textInterest}
+                            >
+                              {x.title}
+                            </Interest>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        // style={styles.interestsContainer}
+                      >
+                        {Interests.slice(29, 39).map((x) => (
+                          <View style={styles.profileInterest}>
+                            <Interest
+                              key={x.id}
+                              onPress={() => handleEditSelectedInterests(x.id)}
+                              active={newInterests.includes(x.id)}
+                              style={styles.textInterest}
+                            >
+                              {x.title}
+                            </Interest>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        // style={styles.interestsContainer}
+                      >
+                        {Interests.slice(39, 49).map((x) => (
+                          <View style={styles.profileInterest}>
+                            <Interest
+                              key={x.id}
+                              onPress={() => handleEditSelectedInterests(x.id)}
+                              active={newInterests.includes(x.id)}
+                              style={styles.textInterest}
+                            >
+                              {x.title}
+                            </Interest>
+                          </View>
+                        ))}
+                      </ScrollView>
+                      <ScrollView
+                        horizontal={true}
+                        showsHorizontalScrollIndicator={false}
+                        // style={styles.interestsContainer}
+                      >
+                        {Interests.slice(49, 54).map((x) => (
+                          <View style={styles.profileInterest}>
+                            <Interest
+                              key={x.id}
+                              onPress={() => handleEditSelectedInterests(x.id)}
+                              active={newInterests.includes(x.id)}
+                              style={styles.textInterest}
+                            >
+                              {x.title}
+                            </Interest>
+                          </View>
+                        ))}
+                      </ScrollView>
+                    </View>
+                    {newInterests.length < 5 ? (
+                      <Text style={styles.errorEditInterests}>
+                        Select at least 5 interests
+                      </Text>
+                    ) : null}
+                    <Button
+                      onPress={submitEditProfile}
+                      backgroundColor={Colors.colors.darkDustyPurple}
+                      color="white"
+                      width={200}
+                    >
+                      Edit
+                    </Button>
+                  </View>
+                </Pressable>
+              </SafeAreaView>
+            </Modal>
+          ) : null}
           <Button
             backgroundColor={Colors.colors.darkDustyPurple}
             color="white"
@@ -576,7 +820,9 @@ function DisplayFriendsScreen() {
                   date={x.birthday}
                   image={x.image}
                   onViewProfile={handleViewProfile}
+                  onEdit={handleEditProfile}
                   onDelete={handleDeleteFriend}
+                  onPress={setSelectedFriendId}
                 />
               </View>
             );
@@ -823,6 +1069,36 @@ const styles = StyleSheet.create({
   textInterest: {
     fontFamily: "Montserrat-Regular",
     fontSize: 14,
+    color: Colors.colors.darkDustyPurple,
+  },
+  editButtonContainer: {
+    borderWidth: 1,
+    borderColor: Colors.colors.cardBackgroundColor,
+    backgroundColor: Colors.colors.darkDustyPurple,
+    shadowColor: Colors.colors.gray,
+    shadowOffset: 1,
+    shadowOpacity: 1,
+    height: 30,
+    width: 30,
+    borderRadius: 30,
+    left: 110,
+    top: -30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  editInterestsContainer: {
+    flex: 0,
+    backgroundColor: Colors.colors.cardBackgroundColor,
+    width: "95%",
+    borderRadius: 10,
+    marginTop: 10,
+    marginBottom: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  errorEditInterests: {
+    fontFamily: "Montserrat-Regular",
+    fontSize: 16,
     color: Colors.colors.darkDustyPurple,
   },
 });
