@@ -17,7 +17,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import Input from "../components/Input";
 import Interest from "../components/Interest";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Icon, { Icons } from "../components/Icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Interests } from "../utils/interests";
@@ -34,7 +34,7 @@ import {
 import { UserContext } from "../context/AuthContext";
 import { async } from "@firebase/util";
 
-function DisplayFriendsScreen() {
+function DisplayFriendsScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
 
   const GENDER = {
@@ -243,13 +243,14 @@ function DisplayFriendsScreen() {
           (currentFriend) => currentFriend.key === selectedFriendId
         )
       );
+      authenticatedUser.getFriendId(selectedFriendId);
       if (currentFriend) {
+        authenticatedUser.getFriendName(currentFriend.name);
         setEditSelectedInterests(currentFriend.interests);
         setNewInterests(currentFriend.interests);
       }
     }
     console.log(selectedFriendId);
-    // console.log(currentFriend.interests);
   }, [selectedFriendId]);
 
   const handleEditSelectedInterests = (id) => {
@@ -267,7 +268,7 @@ function DisplayFriendsScreen() {
         const response = await addImage(photo, newImagePath);
       }
       if (newInterests.length >= 5) {
-        const reponnseInterests = await editFriend(userId, selectedFriendId, {
+        const responseInterests = await editFriend(userId, selectedFriendId, {
           gender: currentFriend.gender,
           name: currentFriend.name.name,
           birthday: currentFriend.birthday,
@@ -281,6 +282,29 @@ function DisplayFriendsScreen() {
       console.log(error);
     }
   };
+
+  // Gift Suggestions Screen
+
+  // const handleGiftSuggestions = (friendId) => {
+  //   navigation.navigate("Display Gift Suggestions", { id: currentFriendId });
+  // };
+
+  // console.log(selectedFriendId);
+  // console.log("- " + selectedFriendId + " -");
+  // useEffect(() => {
+  //   if (selectedFriendId) {
+  //     navigation.setParams({
+  //       id: selectedFriendId,
+  //     });
+  //   }
+  // }, [selectedFriendId, navigation]);
+
+  // const handleGiftSuggestions = (friendId) => {
+  //   console.log("aici");
+  //   // console.log(giftFriendId);
+  //   console.log(giftFriendIdRef.current);
+  //   navigation.navigate("Display Gift Suggestions", { id: selectedFriendId });
+  // };
 
   return (
     <ScrollView bounces={false} style={styles.container}>
@@ -715,6 +739,7 @@ function DisplayFriendsScreen() {
                   date={x.birthday}
                   image={x.image}
                   onViewProfile={handleViewProfile}
+                  onGift={() => navigation.navigate("Display Gift Suggestions")}
                   onEdit={handleEditProfile}
                   onDelete={handleDeleteFriend}
                   onPress={setSelectedFriendId}

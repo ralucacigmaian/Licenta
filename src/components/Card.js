@@ -8,6 +8,7 @@ function Card({
   date,
   image,
   onViewProfile,
+  onGift,
   onEdit,
   onDelete,
   onPress,
@@ -60,7 +61,12 @@ function Card({
             </Pressable>
           </View>
           <View style={styles.sendGift}>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
+            <Pressable
+              onPress={() => {
+                onGift(id), onPress(id);
+              }}
+              style={({ pressed }) => pressed && styles.pressed}
+            >
               <Icon
                 type={Icons.Ionicons}
                 name="ios-gift"

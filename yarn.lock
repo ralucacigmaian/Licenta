@@ -2347,6 +2347,11 @@
   resolved "https://registry.npmjs.org/@sinclair/typebox/-/typebox-0.25.23.tgz"
   integrity sha512-VEB8ygeP42CFLWyAJhN5OklpxUliqdNEUcXb4xZ/CINqtYGTjL5ukluKdKzQ0iWdUxyQ7B0539PAUhHKrCNWSQ==
 
+"@stripe/stripe-react-native@^0.27.0":
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/@stripe/stripe-react-native/-/stripe-react-native-0.27.0.tgz#0f347e7d498400c363eed7ff4de9cf3379b2fe65"
+  integrity sha512-NSxc90W3G/pt1QGG0gM8BmT1+DMLDaz1EatRUJHlw3b8nXohriYsINtpLdfaPH9y8hKx6sbDbYBo4rpVqBHUnQ==
+
 "@types/glob@*":
   version "8.1.0"
   resolved "https://registry.npmjs.org/@types/glob/-/glob-8.1.0.tgz"
