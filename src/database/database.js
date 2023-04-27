@@ -68,6 +68,32 @@ export async function getUsersFriend(id) {
   return friends;
 }
 
+export async function getFriendInterests(idUser, idFriend) {
+  const response = await axios.get(
+    URL + `/users/${idUser}/friends/${idFriend}.json`
+  );
+  const friendInterests = {
+    interests: response.data.interests,
+  };
+  return friendInterests;
+}
+
+export async function getFemaleInterests(idInterest, indexOfInterest) {
+  const response = await axios.get(
+    URL + `/interests/female/${idInterest}/${indexOfInterest}.json`
+  );
+  const femaleInterests = {
+    informationInterests: response.data,
+    imageInterests: await getImageURL(
+      `interests/female/${idInterest}/${indexOfInterest}.jpg`
+    ),
+  };
+  // console.log(femaleInterests);
+  return femaleInterests;
+}
+
+// getFemaleInterests("F01", "F011");
+
 export async function getImageURL(path) {
   const imageRef = ref(storage, path);
   const URL = await getDownloadURL(imageRef).then((responseURL) => {

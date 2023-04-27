@@ -10,6 +10,7 @@ import WelcomeScreen from "./src/screens/WelcomeScreen";
 import SignInScreen from "./src/screens/SignInScreen";
 import SignUpScreen from "./src/screens/SignUpScreen";
 import HomeScreen from "./src/screens/HomeScreen";
+import DisplayGiftSuggestionsScreen from "./src/screens/DisplayGiftSuggestions";
 import { firebase } from "./config";
 import { useEffect, useState, useRef } from "react";
 import Icon, { Icons } from "./src/components/Icons";
@@ -92,11 +93,6 @@ const TabButton = (props) => {
 };
 
 function BottomTabNavigator() {
-  const [updateBottomTab, setUpdateBottomTab] = useState(0);
-
-  const handleNavigation = () => {
-    setUpdateBottomTab(updateBottomTab + 1);
-  };
   return (
     <Tab.Navigator
       // key={updateBottomTab}
@@ -232,6 +228,17 @@ export default function App() {
               name="Bottom Navigator"
               component={BottomTabNavigator}
               options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Display Gift Suggestions"
+              component={DisplayGiftSuggestionsScreen}
+              options={{
+                headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                title: null,
+              }}
             />
             {/* <Stack.Screen name="CreateProfile" component={CreateProfileScreen} /> */}
           </Stack.Navigator>

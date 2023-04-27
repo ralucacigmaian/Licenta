@@ -4,14 +4,11 @@ import Button from "../components/Button";
 import { firebase } from "app/config.js";
 import { Colors } from "../utils/colors";
 import { UserContext } from "../context/AuthContext";
-// import { readData, getUsersFriend } from "../database/database";
-// import { ref, onValue } from "firebase/database";
-// import { realtime } from "../../config";
-// import DisplayFriendsScreen from "./DisplayFriendsScreen";
 
 function HomeScreen({ navigation }) {
   const [name, setName] = useState("");
   const [userId, setUserId] = useState(null);
+  const authenticatedUser = useContext(UserContext);
 
   useEffect(() => {
     firebase
@@ -22,6 +19,8 @@ function HomeScreen({ navigation }) {
       .then((snapshot) => {
         if (snapshot.exists) {
           setName(snapshot.data());
+          const userName = snapshot.data();
+          authenticatedUser.getUserName(userName.name);
         } else {
           console.log("User doesn't exist");
         }
