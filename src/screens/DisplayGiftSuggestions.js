@@ -16,7 +16,7 @@ import { Colors } from "../utils/colors";
 import Tag from "../components/Tag";
 import { Interests } from "../utils/interests";
 
-function DisplayGiftSuggestionsScreen() {
+function DisplayGiftSuggestionsScreen({ navigation, route }) {
   const authenticatedUser = useContext(UserContext);
   let userId = authenticatedUser.uid;
   let friendId = authenticatedUser.fid;
@@ -121,6 +121,7 @@ function DisplayGiftSuggestionsScreen() {
             <ScrollView
               horizontal={true}
               showsHorizontalScrollIndicator={false}
+              style={styles.horizontalContainer}
             >
               {femaleGifts.slice(0, 3).map((x) => {
                 return (
@@ -129,6 +130,16 @@ function DisplayGiftSuggestionsScreen() {
                     price={x.informationInterests.price}
                     description={x.informationInterests.description}
                     image={x.imageInterests}
+                    onDetails={() =>
+                      navigation.navigate("Display Gift Details", {
+                        name: x.informationInterests.name,
+                        price: x.informationInterests.price,
+                        description: x.informationInterests.description,
+                        image: x.imageInterests,
+                        userId: userId,
+                        friendId: friendId,
+                      })
+                    }
                   />
                 );
               })}
@@ -141,6 +152,7 @@ function DisplayGiftSuggestionsScreen() {
             <ScrollView
               horizontal={true}
               showsHorizontalScrollIndicator={false}
+              style={styles.horizontalContainer}
             >
               {femaleGifts.slice(3, 6).map((x) => {
                 return (
@@ -149,6 +161,16 @@ function DisplayGiftSuggestionsScreen() {
                     price={x.informationInterests.price}
                     description={x.informationInterests.description}
                     image={x.imageInterests}
+                    onDetails={() =>
+                      navigation.navigate("Display Gift Details", {
+                        name: x.informationInterests.name,
+                        price: x.informationInterests.price,
+                        description: x.informationInterests.description,
+                        image: x.imageInterests,
+                        userId: userId,
+                        friendId: friendId,
+                      })
+                    }
                   />
                 );
               })}
@@ -202,6 +224,9 @@ const styles = StyleSheet.create({
     color: Colors.colors.darkDustyPurple,
     marginHorizontal: 10,
     marginVertical: 10,
+  },
+  horizontalContainer: {
+    paddingLeft: 10,
   },
 });
 

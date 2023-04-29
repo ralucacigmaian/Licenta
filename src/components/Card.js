@@ -12,6 +12,7 @@ function Card({
   onEdit,
   onDelete,
   onPress,
+  receivedGift,
 }) {
   // Get how many days are left until the next birthday
 
@@ -36,14 +37,14 @@ function Card({
       <View style={styles.detailsContainer}>
         <Text style={styles.textName}>{name}</Text>
         <Text style={styles.textBirthdayDate}>{date}</Text>
-        {/* {["Gaming", "Make-up", "Party", "Dancing all night"].map((x) => (
-          <View style={styles.interestsContainer}>
-            <Interest>{x}</Interest>
-          </View>
-        ))} */}
         <Text style={styles.textNextBirthday}>
           Birthday is coming in {diffDays} days
         </Text>
+        {receivedGift ? (
+          <Text style={styles.textBirthdayDate}>
+            You have already sent a gift!
+          </Text>
+        ) : null}
         <View style={styles.buttonsContainer}>
           <View style={styles.viewProfile}>
             <Pressable

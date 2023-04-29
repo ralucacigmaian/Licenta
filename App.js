@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text } from "react-native";
 import { Colors } from "./src/utils/colors";
 import { useFonts } from "expo-font";
 import AppLoading from "expo-app-loading";
@@ -17,6 +17,8 @@ import Icon, { Icons } from "./src/components/Icons";
 import * as Animatable from "react-native-animatable";
 import DisplayFriendsScreen from "./src/screens/DisplayFriendsScreen";
 import UserContextProvider from "./src/context/AuthContext";
+import GiftDetailsScreen from "./src/screens/GiftDetailsScreen";
+import PaymentScreen from "./src/screens/PaymentScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -234,6 +236,29 @@ export default function App() {
               component={DisplayGiftSuggestionsScreen}
               options={{
                 headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                title: null,
+              }}
+            />
+            <Stack.Screen
+              name="Display Gift Details"
+              component={GiftDetailsScreen}
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                title: null,
+              }}
+            />
+            <Stack.Screen
+              name="Payment"
+              component={PaymentScreen}
+              options={{
+                headerShow: true,
                 headerLargeTitleShadowVisible: false,
                 headerBackTitleVisible: false,
                 headerTintColor: Colors.colors.darkDustyPurple,
