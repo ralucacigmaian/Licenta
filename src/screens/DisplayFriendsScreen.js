@@ -17,7 +17,7 @@ import Button from "../components/Button";
 import Card from "../components/Card";
 import Input from "../components/Input";
 import Interest from "../components/Interest";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Icon, { Icons } from "../components/Icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Interests } from "../utils/interests";
@@ -33,6 +33,7 @@ import {
 } from "../database/database";
 import { UserContext } from "../context/AuthContext";
 import { async } from "@firebase/util";
+import { useFocusEffect } from "@react-navigation/native";
 
 function DisplayFriendsScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -183,14 +184,16 @@ function DisplayFriendsScreen({ navigation }) {
   const [retrievedArray, setRetrievedArray] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchFriends = async () => {
-      const friendsArray = await getUsersFriend(userId);
-      setRetrievedArray(friendsArray);
-      setLoading(false);
-    };
-    fetchFriends();
-  }, [userId, numberOfFriends]);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchFriends = async () => {
+        const friendsArray = await getUsersFriend(userId);
+        setRetrievedArray(friendsArray);
+        setLoading(false);
+      };
+      fetchFriends();
+    }, [userId, numberOfFriends])
+  );
 
   // View Friend Profile
 
@@ -743,6 +746,7 @@ function DisplayFriendsScreen({ navigation }) {
                   onEdit={handleEditProfile}
                   onDelete={handleDeleteFriend}
                   onPress={setSelectedFriendId}
+                  receivedGift={x.receivedGift}
                 />
               </View>
             );

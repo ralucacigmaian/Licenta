@@ -7,66 +7,82 @@ import {
   Pressable,
   Modal,
   SafeAreaView,
+  Dimensions,
 } from "react-native";
 import { Colors } from "../utils/colors";
 import Button from "./Button";
 import Icon, { Icons } from "./Icons";
 
-function GiftCard({ image, name, price, description }) {
+const { width } = Dimensions.get("screen");
+
+function GiftCard({ image, name, price, description, onDetails }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [favourite, setFavourite] = useState(false);
 
   return (
-    <Pressable onPress={() => setModalVisible(true)}>
-      <Modal visible={modalVisible} transparent={true} animationType="fade">
-        <SafeAreaView style={styles.modalContainer}>
-          <Pressable onPress={() => setModalVisible(false)}>
-            <View style={styles.modalView}>
-              <View style={styles.modalInformation}>
-                <View style={styles.modalImageContainer}>
-                  <Image source={{ uri: image }} style={styles.modalImage} />
-                </View>
-                <Text style={styles.textModalName}>{name}</Text>
-                <Text style={styles.textModalDescription}>{description}</Text>
-                <Text style={styles.textModalPrice}>{price}$</Text>
-                <View style={styles.buttonModalCart}>
-                  <Button
-                    backgroundColor={Colors.colors.darkDustyPurple}
-                    color="white"
-                    width={200}
-                  >
-                    Add to cart
-                  </Button>
-                </View>
-              </View>
-            </View>
-          </Pressable>
-        </SafeAreaView>
-      </Modal>
+    // <Pressable onPress={() => setModalVisible(true)}>
+    //   <Modal visible={modalVisible} transparent={true} animationType="fade">
+    //     <SafeAreaView style={styles.modalContainer}>
+    //       <Pressable onPress={() => setModalVisible(false)}>
+    //         <View style={styles.modalView}>
+    //           <View style={styles.modalInformation}>
+    //             <View style={styles.modalImageContainer}>
+    //               <Image source={{ uri: image }} style={styles.modalImage} />
+    //             </View>
+    //             <Text style={styles.textModalName}>{name}</Text>
+    //             <Text style={styles.textModalDescription}>{description}</Text>
+    //             <Text style={styles.textModalPrice}>{price}$</Text>
+    //             <View style={styles.buttonModalCart}>
+    //               <Button
+    //                 backgroundColor={Colors.colors.darkDustyPurple}
+    //                 color="white"
+    //                 width={200}
+    //               >
+    //                 Add to cart
+    //               </Button>
+    //             </View>
+    //           </View>
+    //         </View>
+    //       </Pressable>
+    //     </SafeAreaView>
+    //   </Modal>
+    //   <View style={styles.container}>
+    //     <View style={styles.imageContainer}>
+    //       <Image source={{ uri: image }} style={styles.image} />
+    //     </View>
+    //     <View style={styles.informationContainer}>
+    //       <View style={styles.detailsContainer}>
+    //         <Text
+    //           numberOfLines={1}
+    //           ellipsizeMode="tail"
+    //           style={styles.textName}
+    //         >
+    //           {name}
+    //         </Text>
+    //         <Text style={styles.textPrice}>{price}$</Text>
+    //       </View>
+    //       <View style={styles.buttonContainer}>
+    //         <Button
+    //           backgroundColor={Colors.colors.darkDustyPurple}
+    //           color="white"
+    //           width={200}
+    //         >
+    //           Add to cart
+    //         </Button>
+    //       </View>
+    //     </View>
+    //   </View>
+    // </Pressable>
+    <Pressable onPress={onDetails}>
       <View style={styles.container}>
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: image }} style={styles.image} />
+        <View style={styles.containerImage}>
+          <Image style={styles.image} source={{ uri: image }} />
         </View>
-        <View style={styles.informationContainer}>
-          <View style={styles.detailsContainer}>
-            <Text
-              numberOfLines={1}
-              ellipsizeMode="tail"
-              style={styles.textName}
-            >
-              {name}
-            </Text>
-            <Text style={styles.textPrice}>{price}$</Text>
-          </View>
-          <View style={styles.buttonContainer}>
-            <Button
-              backgroundColor={Colors.colors.darkDustyPurple}
-              color="white"
-              width={200}
-            >
-              Add to cart
-            </Button>
-          </View>
+        <View style={styles.containerName}>
+          <Text style={styles.textName}>{name}</Text>
+        </View>
+        <View style={styles.containerPrice}>
+          <Text style={styles.textPrice}>${price}</Text>
         </View>
       </View>
     </Pressable>
@@ -76,11 +92,24 @@ function GiftCard({ image, name, price, description }) {
 const styles = StyleSheet.create({
   container: {
     width: 300,
-    height: 300,
+    height: 290,
     backgroundColor: Colors.colors.cardBackgroundColor,
     borderRadius: 10,
-    marginRight: 10,
+    marginRight: 20,
     // flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  containerImage: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  containerName: {
+    marginHorizontal: 10,
+  },
+  containerPrice: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   imageContainer: {
     marginLeft: 10,
@@ -89,9 +118,14 @@ const styles = StyleSheet.create({
   },
   image: {
     // width: "90%",
-    height: 200,
-    width: 250,
+    // height: 200,
+    // width: 250,
     // height: "80%",
+    // borderRadius: 10,
+    height: 220,
+    width: width / 2,
+    padding: 10,
+    overflow: "hidden",
     borderRadius: 10,
   },
   informationContainer: {
@@ -106,8 +140,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   textName: {
-    fontFamily: "Montserrat-SemiBoldItalic",
-    fontSize: 16,
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 17,
     color: Colors.colors.darkDustyPurple,
     textAlign: "center",
   },
