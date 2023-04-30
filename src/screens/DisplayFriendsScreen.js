@@ -30,6 +30,8 @@ import {
   deleteFriend,
   editImage,
   editFriend,
+  addNotification,
+  deleteNotification,
 } from "../database/database";
 import { UserContext } from "../context/AuthContext";
 import { async } from "@firebase/util";
@@ -158,12 +160,18 @@ function DisplayFriendsScreen({ navigation }) {
         const response = await addFriend(
           userId,
           gender,
-          name,
+          name.name,
           birthday,
           selectedInterests
         );
         const imagePath = `friends/${userId}/${response}.jpeg`;
         const responseImage = await addImage(photo, imagePath);
+        const responseNotification = await addNotification(
+          userId,
+          response,
+          name.name,
+          birthday
+        );
         setNumberOfFriends(numberOfFriends + 1);
       } catch (error) {
         console.log(error);
@@ -214,6 +222,11 @@ function DisplayFriendsScreen({ navigation }) {
 
   const handleDeleteFriend = (friendId) => {
     let formattedPathToDelete = `friends/${userId}/${friendId}.jpeg`;
+    // deleteNotification(friendId).then(() => {
+    //   console.log(
+    //     `Notification for friend ${friendId} was deleted successfully!`
+    //   );
+    // });
     deleteFriend(userId, friendId, formattedPathToDelete)
       .then(() => {
         console.log(`Friend ${friendId} was deleted successfully!`);

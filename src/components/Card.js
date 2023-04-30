@@ -4,6 +4,7 @@ import Icon, { Icons } from "./Icons";
 
 function Card({
   id,
+  idNotfication,
   name,
   date,
   image,
@@ -93,7 +94,7 @@ function Card({
           </View>
           <View style={styles.deleteProfile}>
             <Pressable
-              onPress={() => onDelete(id)}
+              onPress={() => onDelete(id, idNotfication)}
               style={({ pressed }) => pressed && styles.pressed}
             >
               <Icon

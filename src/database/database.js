@@ -57,7 +57,7 @@ export async function getUsersFriend(id) {
     // console.log(response.data);
     const friendsRetrieved = {
       gender: response.data[key].gender,
-      name: response.data[key].name.name,
+      name: response.data[key].name,
       birthday: response.data[key].birthday,
       interests: response.data[key].interests,
       receivedGift: response.data[key].receivedGift,
@@ -150,4 +150,47 @@ export async function editImage(path, newPath) {
   console.log(snap);
   blob.close();
   return snap;
+}
+
+export async function addNotification(idUser, idFriend, name, birthday) {
+  const response = await axios.post(URL + `/notifications.json`, {
+    idUser: idUser,
+    idFriend: idFriend,
+    name: name,
+    birthday: birthday,
+  });
+  const notificationId = response.data.name;
+
+  return notificationId;
+}
+
+export async function deleteNotification(idNotification) {
+  const response = await axios.delete(
+    URL + `/notifications/${idNotification}.json`
+  );
+  return response;
+}
+
+export async function getUsersNotification(idUser) {
+  let notificationDetails = [];
+  const response = await axios.get(URL + `/notifications.json`);
+  if (response.data) {
+    const notificationKeys = Object.keys(response.data);
+    const notifications = Object.values(response.data);
+    notifications.map((notification, index) => {
+      notification.key = notificationKeys[index];
+    });
+    const filtered = notifications.filter(function (notification) {
+      return notification.idUser === idUser;
+    });
+    for (const key in filtered) {
+      const notificationRetrieved = {
+        idFriend: filtered[key].idFriend,
+        name: filtered[key].name,
+        birthday: filtered[key].birthday,
+      };
+      notificationDetails.push(notificationRetrieved);
+    }
+  }
+  return notificationDetails;
 }
