@@ -12,6 +12,8 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import { Colors } from "../utils/colors";
 import { firebase } from "app/config.js";
+import * as ImagePicker from "expo-image-picker";
+import { addImage } from "../database/database";
 
 function SignUpScreen({ navigation }) {
   const [inputs, setInputs] = useState({
@@ -21,6 +23,21 @@ function SignUpScreen({ navigation }) {
     password: "",
     confirmPassword: "",
   });
+
+  const [photo, setPhoto] = useState(null);
+
+  const handleSelectImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.2,
+    });
+
+    if (!result.canceled) {
+      setPhoto(result.uri);
+    }
+  };
 
   const firebaseErrorTypeOne =
     "Firebase: The email address is already in use by another account. (auth/email-already-in-use).";
@@ -78,30 +95,34 @@ function SignUpScreen({ navigation }) {
 
     if (valid) {
       console.log(inputs);
-      await firebase
-        .auth()
-        .createUserWithEmailAndPassword(email, password)
-        .then(() => {
-          firebase
-            .firestore()
-            .collection("users")
-            .doc(firebase.auth().currentUser.uid)
-            .set({
-              email,
-              name,
-              phoneNumber,
-            })
-            .catch((error) => {
-              alert(error.message);
-            });
-          navigation.navigate("Home");
-        })
-        .catch((error) => {
-          // alert(error.message);
-          if (error.message === firebaseErrorTypeOne) {
-            handleError("An account with this email already exists!", "email");
-          }
-        });
+      try {
+        await firebase.auth().createUserWithEmailAndPassword(email, password);
+        // .then(() => {
+        firebase
+          .firestore()
+          .collection("users")
+          .doc(firebase.auth().currentUser.uid)
+          .set({
+            email,
+            name,
+            phoneNumber,
+          })
+          .catch((error) => {
+            alert(error.message);
+          });
+        const userId = firebase.auth().currentUser.uid;
+        const imagePath = `users/${userId}.jpeg`;
+        const responseImage = await addImage(photo, imagePath);
+        console.log(responseImage);
+        console.log(userId);
+        navigation.navigate("Home");
+        // })
+      } catch (error) {
+        // alert(error.message);
+        if (error.message === firebaseErrorTypeOne) {
+          handleError("An account with this email already exists!", "email");
+        }
+      }
     }
   };
 
@@ -285,6 +306,34 @@ function SignUpScreen({ navigation }) {
                   password
                 />
               </View>
+              <View style={styles.imageContainer}>
+                <Input
+                  label="Profile Picture"
+                  placeholder={
+                    !photo
+                      ? "Select your friend's photo"
+                      : "Image uploaded successfully!"
+                  }
+                  placeholderTextColor={Colors.colors.gray}
+                  color={Colors.colors.darkDustyPurple}
+                  backgroundColor="white"
+                  backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                  borderColor={Colors.colors.darkDustyPurple}
+                  iconName="ios-images"
+                  iconError="ios-alert-circle"
+                  iconSize={24}
+                  iconColor={Colors.colors.darkDustyPurple}
+                  style={{
+                    fontFamily: "Montserrat-Regular",
+                  }}
+                  error={errors.photo}
+                  onFocus={() => {
+                    handleError(null, "photo");
+                  }}
+                  onPressIn={handleSelectImage}
+                  caretHidden={true}
+                />
+              </View>
             </View>
             <View style={styles.buttonContainer}>
               <Button
@@ -345,7 +394,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     backgroundColor: Colors.colors.dustyPurple,
     width: "80%",
-    height: 590,
+    height: 680,
     shadowColor: "black",
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.5,
@@ -372,7 +421,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   footer: {
-    paddingTop: 8,
+    paddingTop: 30,
     flexDirection: "row",
     justifyContent: "center",
   },
