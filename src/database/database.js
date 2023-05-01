@@ -28,6 +28,9 @@ export async function addFriend(id, gender, name, birthday, interests) {
     birthday: birthday,
     interests: interests,
     receivedGift: 0,
+    giftName: "noGiftName",
+    giftPrice: 0,
+    giftDate: "noGiftDate",
   });
   const friendId = response.data.name;
 
@@ -61,6 +64,9 @@ export async function getUsersFriend(id) {
       birthday: response.data[key].birthday,
       interests: response.data[key].interests,
       receivedGift: response.data[key].receivedGift,
+      giftName: response.data[key].giftName,
+      giftPrice: response.data[key].giftPrice,
+      giftDate: response.data[key].giftDate,
       key: key,
       image: await getImageURL(`friends/${id}/${key}.jpeg`),
     };

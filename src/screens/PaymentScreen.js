@@ -18,6 +18,13 @@ function PaymentScreen({ route, navigation }) {
   const newPrice = price + "00";
   console.log(newPrice);
 
+  const today = new Date();
+  const formattedDate = `${
+    today.getMonth() + 1
+  }/${today.getDate()}/${today.getFullYear()}`;
+
+  // console.log(formattedDate);
+
   console.log(`Payment Screen: ${userId} + ${friendId}`);
 
   const stripe = useStripe();
@@ -108,7 +115,12 @@ function PaymentScreen({ route, navigation }) {
         );
       }
       Alert.alert("Payment complete, thank you!");
-      editFriend(userId, friendId, { receivedGift: 1 });
+      editFriend(userId, friendId, {
+        receivedGift: 1,
+        giftName: name,
+        giftPrice: price,
+        giftDate: formattedDate,
+      });
       navigation.navigate("Bottom Navigator");
     } catch (error) {
       console.log(error);

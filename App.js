@@ -11,7 +11,11 @@ import {
 import { Colors } from "./src/utils/colors";
 import { useFonts } from "expo-font";
 import AppLoading from "expo-app-loading";
-import { NavigationContainer, useIsFocused } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useFocusEffect,
+  useIsFocused,
+} from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
@@ -20,7 +24,7 @@ import SignUpScreen from "./src/screens/SignUpScreen";
 import HomeScreen from "./src/screens/HomeScreen";
 import DisplayGiftSuggestionsScreen from "./src/screens/DisplayGiftSuggestions";
 import { firebase } from "./config";
-import { useEffect, useState, useRef, useContext } from "react";
+import { useEffect, useState, useRef, useContext, useCallback } from "react";
 import Icon, { Icons } from "./src/components/Icons";
 import * as Animatable from "react-native-animatable";
 import DisplayFriendsScreen from "./src/screens/DisplayFriendsScreen";
@@ -29,6 +33,7 @@ import GiftDetailsScreen from "./src/screens/GiftDetailsScreen";
 import PaymentScreen from "./src/screens/PaymentScreen";
 import UserProfileScreen from "./src/screens/UserProfileScreen";
 import { getImageURL } from "./src/database/database";
+import DisplayGiftHistoryScreen from "./src/screens/DisplayGiftHistoryScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -76,7 +81,7 @@ const Tab = createBottomTabNavigator();
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
-  const [userPhoto, setUserPhoto] = useState();
+  // const [userPhoto, setUserPhoto] = useState();
 
   // const [expoPushToken, setExpoPushToken] = useState("");
   // const [notification, setNotification] = useState(false);
@@ -137,17 +142,8 @@ export default function App() {
       setInitializing(false);
     }
   }
-  const getUsersImage = async () => {
-    if (user) {
-      const imagePath = `users/${user.uid}.jpeg`;
-      const responseImage = await getImageURL(imagePath);
-      setUserPhoto(responseImage);
-    }
-  };
 
-  getUsersImage();
-
-  console.log(userPhoto);
+  // console.log(userPhoto);
 
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
@@ -165,6 +161,32 @@ export default function App() {
   // getUsersImage();
 
   function BottomTabNavigator({ navigation }) {
+    const [userPhoto, setUserPhoto] = useState();
+    // useEffect(() => {
+    //   async function getUsersImage() {
+    //     if (user) {
+    //       const imagePath = `users/${user.uid}.jpeg`;
+    //       const responseImage = await getImageURL(imagePath);
+    //       setUserPhoto(responseImage);
+    //     }
+    //   }
+    //   const interval = setInterval(() => {
+    //     getUsersImage();
+    //   }, 10);
+    //   return () => clearInterval(interval);
+    // }, []);
+    useFocusEffect(
+      useCallback(() => {
+        async function getUsersImage() {
+          if (user) {
+            const imagePath = `users/${user.uid}.jpeg`;
+            const responseImage = await getImageURL(imagePath);
+            setUserPhoto(responseImage);
+          }
+        }
+        getUsersImage();
+      }, [])
+    );
     return (
       <Tab.Navigator
         screenOptions={{
@@ -340,6 +362,20 @@ export default function App() {
             <Stack.Screen
               name="Profilul Meu"
               component={UserProfileScreen}
+              options={{
+                headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 20,
+                },
+              }}
+            />
+            <Stack.Screen
+              name="Istoricul Cadourilor"
+              component={DisplayGiftHistoryScreen}
               options={{
                 headerShown: true,
                 headerLargeTitleShadowVisible: false,
