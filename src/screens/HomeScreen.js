@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, SafeAreaView, Image } from "react-native";
 import Button from "../components/Button";
 import { firebase } from "app/config.js";
 import { Colors } from "../utils/colors";
@@ -12,6 +12,7 @@ import {
 } from "../notifications/notifications";
 import * as Notifications from "expo-notifications";
 import { getUsersNotification } from "../database/database";
+import { getImageURL } from "../database/database";
 
 function HomeScreen({ navigation }) {
   const [name, setName] = useState("");
@@ -22,11 +23,6 @@ function HomeScreen({ navigation }) {
   const [notification, setNotification] = useState(false);
   const notificationListener = useRef();
   const responseListener = useRef();
-
-  // const currentDate = new Date();
-  // const timezoneOffset = 180;
-  // const romanianTime = currentDate.getTime() + timezoneOffset * 60 * 1000;
-  // const [actualDate, setActualDate] = useState(new Date(romanianTime));
 
   useEffect(() => {
     firebase
@@ -98,19 +94,24 @@ function HomeScreen({ navigation }) {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         scheduleNotification(
-          "Atentie!",
-          `Ziua prietenului tau, ${response[key].name}, este in ${diffDays} zile`,
-          19,
-          27
+          "Atenție!",
+          `Ziua prietenului tău, ${response[key].name}, este în ${diffDays} zile`,
+          11,
+          20
         );
       }
     });
   }, []);
 
+  const handleLogOut = () => {
+    authenticatedUser.logout;
+    firebase.auth().signOut();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text>Hello {name.name}, add your friends now</Text>
-      <Button onPress={() => firebase.auth().signOut()}>Logout</Button>
+      <Button onPress={handleLogOut}>Logout</Button>
       {/* <Button onPress={sendPushNotification(expoPushToken)}>
         Send Notificare
       </Button> */}

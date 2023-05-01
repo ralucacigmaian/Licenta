@@ -5,11 +5,13 @@ import {
   TouchableOpacity,
   Text,
   Platform,
+  Image,
+  Pressable,
 } from "react-native";
 import { Colors } from "./src/utils/colors";
 import { useFonts } from "expo-font";
 import AppLoading from "expo-app-loading";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useIsFocused } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
@@ -25,118 +27,11 @@ import DisplayFriendsScreen from "./src/screens/DisplayFriendsScreen";
 import UserContextProvider from "./src/context/AuthContext";
 import GiftDetailsScreen from "./src/screens/GiftDetailsScreen";
 import PaymentScreen from "./src/screens/PaymentScreen";
+import UserProfileScreen from "./src/screens/UserProfileScreen";
+import { getImageURL } from "./src/database/database";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
-const TabArray = [
-  {
-    route: "Home",
-    label: "Home",
-    type: Icons.Ionicons,
-    activeIcon: "ios-home",
-    inactiveIcon: "ios-home-outline",
-    component: HomeScreen,
-  },
-  // {
-  //   route: "CreateProfile",
-  //   label: "Create Your Profile",
-  //   type: Icons.MaterialCommunityIcons,
-  //   activeIcon: "account-circle",
-  //   inactiveIcon: "account-circle-outline",
-  //   component: CreateProfileScreen,
-  // },
-  {
-    route: "AddFriend",
-    label: "Add Friends",
-    type: Icons.Ionicons,
-    activeIcon: "ios-people-circle",
-    inactiveIcon: "ios-people-circle-outline",
-    component: DisplayFriendsScreen,
-  },
-];
-
-const TabButton = (props) => {
-  const { item, onPress, accessibilityState } = props;
-  const focused = accessibilityState.selected;
-  const viewRef = useRef(null);
-
-  // useEffect(() => {
-  //   if (focused) {
-  //     viewRef.current.animate({
-  //       0: { scale: 0.5, rotate: "0deg" },
-  //       1: { scale: 1.5, rotate: "360deg" },
-  //     });
-  //   } else {
-  //     viewRef.current.animate({
-  //       0: { scale: 1.5, rotate: "360deg" },
-  //       1: { scale: 1, rotate: "0deg" },
-  //     });
-  //   }
-  // }, [focused]);
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      activeOpacity={1}
-      style={styles.bottomTab}
-    >
-      <Animatable.View
-        style={styles.bottomTab}
-        // animation="zoomIn"
-        ref={viewRef}
-        duration={1000}
-      >
-        <Icon
-          name={focused ? item.activeIcon : item.inactiveIcon}
-          type={item.type}
-          size={24}
-          color={
-            focused ? Colors.colors.dustyPurple : Colors.colors.dustyPurple
-          }
-        />
-      </Animatable.View>
-    </TouchableOpacity>
-  );
-};
-
-function BottomTabNavigator() {
-  return (
-    <Tab.Navigator
-      // key={updateBottomTab}
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          height: 60,
-          position: "absolute",
-          bottom: 16,
-          right: 16,
-          left: 16,
-          borderRadius: 16,
-          backgroundColor: Colors.colors.darkDustyPurple,
-          // opacity: 0.7,
-          // backgroundColor: Colors.colors.lightPurple2,
-        },
-      }}
-    >
-      {TabArray.map((item, index) => {
-        return (
-          <Tab.Screen
-            name={item.route}
-            component={item.component}
-            // listeners={{ focus: handleNavigation }}
-            options={{
-              tabBarShowLabel: false,
-              // unmountOnBlur: true,
-              lazy: false,
-              tabBarButton: (props) => <TabButton {...props} item={item} />,
-            }}
-          />
-        );
-      })}
-    </Tab.Navigator>
-  );
-}
 
 // Notifications.setNotificationHandler({
 //   handleNotification: async () => ({
@@ -181,6 +76,7 @@ function BottomTabNavigator() {
 export default function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState();
+  const [userPhoto, setUserPhoto] = useState();
 
   // const [expoPushToken, setExpoPushToken] = useState("");
   // const [notification, setNotification] = useState(false);
@@ -241,6 +137,17 @@ export default function App() {
       setInitializing(false);
     }
   }
+  const getUsersImage = async () => {
+    if (user) {
+      const imagePath = `users/${user.uid}.jpeg`;
+      const responseImage = await getImageURL(imagePath);
+      setUserPhoto(responseImage);
+    }
+  };
+
+  getUsersImage();
+
+  console.log(userPhoto);
 
   useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
@@ -253,6 +160,91 @@ export default function App() {
 
   if (!fontsLoaded) {
     return <AppLoading />;
+  }
+
+  // getUsersImage();
+
+  function BottomTabNavigator({ navigation }) {
+    return (
+      <Tab.Navigator
+        screenOptions={{
+          title: null,
+          headerShown: true,
+          headerShadowVisible: false,
+          tabBarStyle: {
+            // height: 60,
+            // position: "absolute",
+            // bottom: 16,
+            // right: 16,
+            // left: 16,
+            // borderRadius: 16,
+            backgroundColor: Colors.colors.dustyPurple,
+            // opacity: 0.7,
+            // backgroundColor: Colors.colors.lightPurple2,
+          },
+        }}
+      >
+        <Tab.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <Icon
+                type={Icons.Ionicons}
+                name={focused ? "ios-home" : "ios-home-outline"}
+                size={30}
+                color="white"
+              />
+            ),
+            tabBarLabel: "Acasă",
+            tabBarLabelStyle: {
+              fontFamily: "Montserrat-Regular",
+              fontSize: 16,
+              color: "white",
+            },
+            headerRight: () => (
+              <Pressable
+                style={{
+                  marginRight: 10,
+                  paddingTop: 55,
+                }}
+                onPress={() =>
+                  navigation.navigate("Profilul Meu", { userId: user.uid })
+                }
+              >
+                <Image
+                  source={{ uri: userPhoto }}
+                  style={{ width: 50, height: 50, borderRadius: 50 }}
+                />
+              </Pressable>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Add Friends"
+          component={DisplayFriendsScreen}
+          options={{
+            headerShown: false,
+            tabBarIcon: ({ focused }) => (
+              <Icon
+                type={Icons.Ionicons}
+                name={
+                  focused ? "ios-people-circle" : "ios-people-circle-outline"
+                }
+                size={30}
+                color="white"
+              />
+            ),
+            tabBarLabel: "Prieteni",
+            tabBarLabelStyle: {
+              fontFamily: "Montserrat-Regular",
+              fontSize: 16,
+              color: "white",
+            },
+          }}
+        />
+      </Tab.Navigator>
+    );
   }
 
   if (!user) {
@@ -305,7 +297,11 @@ export default function App() {
             <Stack.Screen
               name="Bottom Navigator"
               component={BottomTabNavigator}
-              options={{ headerShown: false }}
+              options={{
+                headerShown: false,
+                headerLargeTitleShadowVisible: false,
+                title: null,
+              }}
             />
             <Stack.Screen
               name="Display Gift Suggestions"
@@ -339,6 +335,20 @@ export default function App() {
                 headerBackTitleVisible: false,
                 headerTintColor: Colors.colors.darkDustyPurple,
                 title: null,
+              }}
+            />
+            <Stack.Screen
+              name="Profilul Meu"
+              component={UserProfileScreen}
+              options={{
+                headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 20,
+                },
               }}
             />
             {/* <Stack.Screen name="CreateProfile" component={CreateProfileScreen} /> */}
