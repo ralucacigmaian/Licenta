@@ -16,7 +16,7 @@ app.post("/pay", async (req, res) => {
     const { newPrice } = req.body;
     const paymentIntent = await stripe.paymentIntents.create({
       amount: newPrice,
-      currency: "usd",
+      currency: "ron",
       payment_method_types: ["card"],
     });
     const clientSecret = paymentIntent.client_secret;

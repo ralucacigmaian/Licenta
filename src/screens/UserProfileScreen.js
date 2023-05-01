@@ -8,7 +8,7 @@ import * as ImagePicker from "expo-image-picker";
 import Option from "../components/Option";
 import { UserContext } from "../context/AuthContext";
 
-function UserProfileScreen({ route }) {
+function UserProfileScreen({ navigation, route }) {
   const { userId } = route.params;
   const [userDetails, setUserDetails] = useState();
   const [userPhoto, setUserPhoto] = useState();
@@ -88,6 +88,7 @@ function UserProfileScreen({ route }) {
                 type={Icons.Octicons}
                 name="clock"
                 information="Vezi istoricul cadourilor"
+                onPress={() => navigation.navigate("Istoricul Cadourilor")}
               />
               <Option
                 type={Icons.Octicons}

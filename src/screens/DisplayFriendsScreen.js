@@ -34,7 +34,6 @@ import {
   deleteNotification,
 } from "../database/database";
 import { UserContext } from "../context/AuthContext";
-import { async } from "@firebase/util";
 import { useFocusEffect } from "@react-navigation/native";
 
 function DisplayFriendsScreen({ navigation }) {
