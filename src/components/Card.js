@@ -30,6 +30,15 @@ function Card({
   const diffTime = nextBirthday.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+  const birthday = date;
+  const auxBirthday = new Date(birthday);
+  const options = {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  };
+  const outputBirthday = auxBirthday.toLocaleDateString("ro-RO", options);
+
   return (
     <View style={styles.container}>
       <View style={styles.imageContainer}>
@@ -37,7 +46,7 @@ function Card({
       </View>
       <View style={styles.detailsContainer}>
         <Text style={styles.textName}>{name}</Text>
-        <Text style={styles.textBirthdayDate}>{date}</Text>
+        <Text style={styles.textBirthdayDate}>{outputBirthday}</Text>
         <Text style={styles.textNextBirthday}>
           Birthday is coming in {diffDays} days
         </Text>

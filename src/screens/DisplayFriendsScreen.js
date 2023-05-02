@@ -49,6 +49,7 @@ function DisplayFriendsScreen({ navigation }) {
   const [gender, setGender] = useState(GENDER.FEMALE);
   const [name, setName] = useState(null);
   const [birthday, setBirthday] = useState("Select your friend's birthday");
+  const [birthdayToAdd, setBirthdayToAdd] = useState();
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [photo, setPhoto] = useState();
   const [submitted, setSubmitted] = useState(false);
@@ -82,15 +83,20 @@ function DisplayFriendsScreen({ navigation }) {
 
     let auxDate = new Date(currentDate);
 
+    const moment = require("moment");
+    require("moment/locale/ro");
+
     let newDate =
       auxDate.getDate() +
       " " +
-      moment(auxDate).format("MMMM") +
+      moment(auxDate).local("ro").format("MMMM") +
       " " +
       auxDate.getFullYear();
 
     setBirthday(newDate);
+    setBirthdayToAdd(auxDate);
 
+    console.log(auxDate);
     console.log(newDate);
 
     // console.log(birthday);
@@ -160,7 +166,7 @@ function DisplayFriendsScreen({ navigation }) {
           userId,
           gender,
           name.name,
-          birthday,
+          birthdayToAdd,
           selectedInterests
         );
         const imagePath = `friends/${userId}/${response}.jpeg`;
@@ -286,7 +292,7 @@ function DisplayFriendsScreen({ navigation }) {
         const responseInterests = await editFriend(userId, selectedFriendId, {
           gender: currentFriend.gender,
           name: currentFriend.name.name,
-          birthday: currentFriend.birthday,
+          birthday: currentFriend.birthdayToAdd,
           interests: newInterests,
         });
       }
@@ -746,6 +752,13 @@ function DisplayFriendsScreen({ navigation }) {
           <ActivityIndicator style={styles.loadingContainer} />
         ) : (
           retrievedArray.map((x) => {
+            const birthday = x.birthday;
+            const auxBirthday = new Date(birthday);
+            const options = { day: "numeric", month: "long", year: "numeric" };
+            const outputBirthday = auxBirthday.toLocaleDateString(
+              "ro-RO",
+              options
+            );
             return (
               <View style={styles.cardsContainer}>
                 <Card
