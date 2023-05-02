@@ -200,7 +200,8 @@ export default function App() {
             // right: 16,
             // left: 16,
             // borderRadius: 16,
-            backgroundColor: Colors.colors.dustyPurple,
+            backgroundColor: Colors.colors.lightDustyPurple,
+            height: 95,
             // opacity: 0.7,
             // backgroundColor: Colors.colors.lightPurple2,
           },
@@ -211,18 +212,20 @@ export default function App() {
           component={HomeScreen}
           options={{
             tabBarIcon: ({ focused }) => (
-              <Icon
-                type={Icons.Ionicons}
-                name={focused ? "ios-home" : "ios-home-outline"}
-                size={30}
-                color="white"
-              />
+              <View style={{ bottom: -5 }}>
+                <Icon
+                  type={Icons.Ionicons}
+                  name={focused ? "ios-home" : "ios-home-outline"}
+                  size={30}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </View>
             ),
             tabBarLabel: "Acasă",
             tabBarLabelStyle: {
-              fontFamily: "Montserrat-Regular",
+              fontFamily: "Montserrat-SemiBold",
               fontSize: 16,
-              color: "white",
+              color: Colors.colors.darkDustyPurple,
             },
             headerRight: () => (
               <Pressable
@@ -248,20 +251,22 @@ export default function App() {
           options={{
             headerShown: false,
             tabBarIcon: ({ focused }) => (
-              <Icon
-                type={Icons.Ionicons}
-                name={
-                  focused ? "ios-people-circle" : "ios-people-circle-outline"
-                }
-                size={30}
-                color="white"
-              />
+              <View style={{ bottom: -5 }}>
+                <Icon
+                  type={Icons.Ionicons}
+                  name={
+                    focused ? "ios-people-circle" : "ios-people-circle-outline"
+                  }
+                  size={30}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </View>
             ),
             tabBarLabel: "Prieteni",
             tabBarLabelStyle: {
-              fontFamily: "Montserrat-Regular",
+              fontFamily: "Montserrat-SemiBold",
               fontSize: 16,
-              color: "white",
+              color: Colors.colors.darkDustyPurple,
             },
           }}
         />

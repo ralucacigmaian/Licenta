@@ -29,7 +29,7 @@ function DisplayGiftHistoryScreen() {
 
   const today = new Date();
   const now = new Date();
-  now.setHours(0, 0, 0, 0); // set time of day to 0:00:00.000
+  now.setHours(0, 0, 0, 0);
   const today2 = now.getTime();
   const oneWeekAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000;
 
