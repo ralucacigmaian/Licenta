@@ -1,4 +1,4 @@
-import { useReducer, useState } from "react";
+import { useContext, useReducer, useState } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { Colors } from "../utils/colors";
 import { firebase } from "app/config.js";
 import * as ImagePicker from "expo-image-picker";
 import { addImage } from "../database/database";
+import { UserContext } from "../context/AuthContext";
 
 function SignUpScreen({ navigation }) {
   const [inputs, setInputs] = useState({
@@ -25,6 +26,8 @@ function SignUpScreen({ navigation }) {
   });
 
   const [photo, setPhoto] = useState(null);
+
+  const authenticatedUser = useContext(UserContext);
 
   const handleSelectImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -90,6 +93,10 @@ function SignUpScreen({ navigation }) {
         handleError("Passwords do not match", "confirmPassword");
       }
     }
+    if (!photo) {
+      valid = false;
+      handleError("Please select your profile picture!", "photo");
+    }
 
     console.log(valid);
 
@@ -111,6 +118,7 @@ function SignUpScreen({ navigation }) {
             alert(error.message);
           });
         const userId = firebase.auth().currentUser.uid;
+        // authenticatedUser.getUserId(userId);
         const imagePath = `users/${userId}.jpeg`;
         const responseImage = await addImage(photo, imagePath);
         console.log(responseImage);
@@ -311,7 +319,7 @@ function SignUpScreen({ navigation }) {
                   label="Profile Picture"
                   placeholder={
                     !photo
-                      ? "Select your friend's photo"
+                      ? "Select your profile photo"
                       : "Image uploaded successfully!"
                   }
                   placeholderTextColor={Colors.colors.gray}

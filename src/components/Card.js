@@ -47,9 +47,15 @@ function Card({
       <View style={styles.detailsContainer}>
         <Text style={styles.textName}>{name}</Text>
         <Text style={styles.textBirthdayDate}>{outputBirthday}</Text>
-        <Text style={styles.textNextBirthday}>
-          Birthday is coming in {diffDays} days
-        </Text>
+        {diffDays === 366 ? (
+          <Text style={styles.textNextBirthday}>
+            Ziua de naștere este astăzi!
+          </Text>
+        ) : (
+          <Text style={styles.textNextBirthday}>
+            Ziua de naștere urmează în {diffDays} zile
+          </Text>
+        )}
         {receivedGift ? (
           <Text style={styles.textBirthdayDate}>
             You have already sent a gift!

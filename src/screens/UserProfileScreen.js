@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable, Alert } from "react-native";
 import { Colors } from "../utils/colors";
 import { firebase } from "app/config.js";
 import { addImage, getImageURL } from "../database/database";
@@ -57,8 +57,49 @@ function UserProfileScreen({ navigation, route }) {
   console.log(userDetails);
 
   const handleLogOut = () => {
-    authenticatedUser.logout;
+    authenticatedUser.logout();
     firebase.auth().signOut();
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Ștergere cont",
+      "Sunteți sigur că doriți să ștergeți acest cont?",
+      [
+        {
+          text: "Da",
+          onPress: () => {
+            const user = firebase.auth().currentUser;
+            const userId = user.uid;
+            user
+              .delete()
+              .then(() => {
+                console.log("User account deleted.");
+                firebase
+                  .firestore()
+                  .collection("users")
+                  .doc(userId)
+                  .delete()
+                  .then(() => {
+                    console.log("User document deleted.");
+                    handleLogOut();
+                  })
+                  .catch((error) => {
+                    console.log("Error deleting user document: ", error);
+                  });
+              })
+              .catch((error) => {
+                console.log("Error deleting user account: ", error);
+              });
+          },
+        },
+        {
+          text: "Nu",
+          style: "cancel",
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   return (
@@ -110,6 +151,7 @@ function UserProfileScreen({ navigation, route }) {
                 type={Icons.AntDesign}
                 name="delete"
                 information="Ștergere cont"
+                onPress={handleDeleteAccount}
               />
             </View>
           </View>
