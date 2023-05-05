@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   Image,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import Button from "../components/Button";
 import { firebase } from "app/config.js";
@@ -25,6 +26,7 @@ import { Icons } from "../components/Icons";
 import HomeScreenCard from "../components/HomeScreenCard";
 import { useFocusEffect } from "@react-navigation/native";
 import { NameDay } from "../utils/nameDay";
+import { Calendar, LocaleConfig } from "react-native-calendars";
 
 function HomeScreen({ navigation }) {
   const [user, setUser] = useState();
@@ -105,34 +107,52 @@ function HomeScreen({ navigation }) {
         const diffTime = nextBirthday.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        scheduleNotification(
-          "Atenție!",
-          `Ziua prietenului tău, ${response[key].name}, este în ${diffDays} zile`,
-          11,
-          20
-        );
+        if (diffDays <= 7) {
+          scheduleNotification(
+            "Atenție! 🥳",
+            `Au mai rămas ${diffDays} zile până la aniversarea lui ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+            20,
+            44
+          );
+        }
+        if (diffDays === 366) {
+          scheduleNotification(
+            "Atenție! 🎉",
+            `Astăzi este ziua prietenului tău, ${response[key].name}! Trimite-i un cadou!`,
+            20,
+            44
+          );
+        }
       }
     });
   }, []);
 
   const [friends, setFriends] = useState();
   const [selectedCategory, setSelectedCategory] = useState("Toate");
+  const [loading, setLoading] = useState(true);
 
   // useEffect(() => {
   //   const fetchFriends = async () => {
   //     const friendsArray = await getUsersFriend(authenticatedUser.uid);
   //     setFriends(friendsArray);
   //   };
-  //   fetchFriends();
-  // }, [selectedCategory]);
+  //   if (authenticatedUser.uid) {
+  //     fetchFriends();
+  //     setLoading(false);
+  //   }
+  // }, [loading]);
 
   useFocusEffect(
     useCallback(() => {
       const fetchFriends = async () => {
         const friendsArray = await getUsersFriend(authenticatedUser.uid);
         setFriends(friendsArray);
+        setLoading(false);
       };
+      // console.log("aici" + authenticatedUser.uid);
+      // if (authenticatedUser.uid) {
       fetchFriends();
+      // }
     }, [])
   );
 
@@ -226,7 +246,100 @@ function HomeScreen({ navigation }) {
   };
 
   handleShowName();
-  console.log(oneWeekNameFriends);
+
+  LocaleConfig.locales["ro"] = {
+    monthNames: [
+      "Ianuarie",
+      "Februarie",
+      "Martie",
+      "Aprilie",
+      "Mai",
+      "Iunie",
+      "Iulie",
+      "August",
+      "Septembrie",
+      "Octombrie",
+      "Noiembrie",
+      "Decembrie",
+    ],
+    monthNamesShort: [
+      "Jan.",
+      "Feb.",
+      "Mar.",
+      "Apr.",
+      "Mai",
+      "Iun.",
+      "Iul.",
+      "Aug.",
+      "Sept.",
+      "Oct.",
+      "Nov.",
+      "Dec.",
+    ],
+    dayNames: [
+      "Duminică",
+      "Luni",
+      "Marți",
+      "Miercuri",
+      "Joi",
+      "Vineri",
+      "Sâmbătă",
+    ],
+    dayNamesShort: ["Dum.", "Lun.", "Mar.", "Mie.", "Joi", "Vin.", "Sâm."],
+    today: "Astăzi",
+  };
+
+  LocaleConfig.defaultLocale = "ro";
+
+  const customCalendarTheme = {
+    textDayFontFamily: "Montserrat-Regular",
+    textMonthFontFamily: "Montserrat-SemiBold",
+    textDayHeaderFontFamily: "Montserrat-Regular",
+    textMonthFontSize: 20,
+    todayTextColor: Colors.colors.lightDustyPurple,
+    dayTextColor: Colors.colors.darkDustyPurple,
+    arrowColor: Colors.colors.darkDustyPurple,
+    monthTextColor: Colors.colors.darkDustyPurple,
+    dotColor: Colors.colors.darkDustyPurple,
+  };
+
+  const birthdays = {};
+  const handleBirthdays = () => {
+    if (friends) {
+      friends.map((x) => {
+        const date = new Date(x.birthday);
+        date.setFullYear(2023);
+        const dateString = date.toISOString().split("T")[0];
+        birthdays[dateString] = { marked: true };
+      });
+    }
+  };
+
+  handleBirthdays();
+
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  const handleDayPress = (day) => {
+    setSelectedDate(day.dateString);
+  };
+
+  let isThereBirthday = false;
+
+  if (loading)
+    return (
+      <ActivityIndicator
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "white",
+        }}
+      />
+    );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -271,7 +384,7 @@ function HomeScreen({ navigation }) {
               onPress={handleCategoryPress}
             />
           </View>
-          <View style={styles.containerCategory}>
+          {/* <View style={styles.containerCategory}>
             <Category
               iconType={Icons.FontAwesome5}
               iconName="user-friends"
@@ -279,7 +392,7 @@ function HomeScreen({ navigation }) {
               isSelected={selectedCategory === "Familie"}
               onPress={handleCategoryPress}
             />
-          </View>
+          </View> */}
           <View style={styles.containerCategory}>
             <Category
               iconType={Icons.FontAwesome5}
@@ -289,7 +402,7 @@ function HomeScreen({ navigation }) {
               onPress={handleCategoryPress}
             />
           </View>
-          <View style={styles.containerCategory}>
+          {/* <View style={styles.containerCategory}>
             <Category
               iconType={Icons.FontAwesome5}
               iconName="gifts"
@@ -297,15 +410,79 @@ function HomeScreen({ navigation }) {
               isSelected={selectedCategory === "Sărbători"}
               onPress={handleCategoryPress}
             />
-          </View>
+          </View> */}
         </ScrollView>
       </View>
       {numberOfFriends !== undefined ? (
         numberOfFriends > 0 ? (
           <View style={styles.containerEvents}>
-            {selectedCategory === "Toate"
-              ? oneWeekFriends.map((x) => <View></View>)
-              : null}
+            {selectedCategory === "Toate" && (
+              <View>
+                <Text style={styles.textHeaderOneWeek}>
+                  Calendarul următoarelor zile de naștere 
+                </Text>
+                <Calendar
+                  theme={customCalendarTheme}
+                  firstDay={1}
+                  markedDates={birthdays}
+                  onDayPress={handleDayPress}
+                />
+                <ScrollView>
+                  {friends.map((x) => {
+                    const birthday = new Date(x.birthday);
+                    birthday.setFullYear(2023);
+                    const dateString = birthday.toISOString().split("T")[0];
+
+                    const auxBirthday = new Date(birthday);
+                    const options = {
+                      day: "numeric",
+                      month: "long",
+                    };
+                    const outputBirthday = auxBirthday.toLocaleDateString(
+                      "ro-RO",
+                      options
+                    );
+
+                    const today = new Date();
+                    let nextBirthday = new Date(
+                      today.getFullYear(),
+                      auxBirthday.getMonth(),
+                      auxBirthday.getDate()
+                    );
+
+                    if (today > nextBirthday) {
+                      nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+                    }
+                    const diffTime = nextBirthday.getTime() - today.getTime();
+                    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 366) {
+                      diffDays = 0;
+                    }
+
+                    if (dateString === selectedDate) {
+                      isThereBirthday = true;
+                      return (
+                        <View style={styles.containerEachOneWeek}>
+                          <HomeScreenCard
+                            photo={x.image}
+                            name={x.name}
+                            birthday={outputBirthday}
+                            daysLeft={diffDays}
+                          />
+                        </View>
+                      );
+                    }
+                  })}
+                </ScrollView>
+                {!isThereBirthday && selectedDate ? (
+                  <Text style={styles.textNoBirthday}>
+                    Ne pare rău, nu există o zi de naștere pentru data
+                    selectată!
+                  </Text>
+                ) : null}
+              </View>
+            )}
             {selectedCategory === "Zile de naștere" ? (
               <View style={styles.containerOneWeek}>
                 <Text style={styles.textHeaderOneWeek}>
@@ -448,8 +625,7 @@ function HomeScreen({ navigation }) {
         ) : (
           <View style={styles.containerNoEvents}>
             <Text style={styles.textNoEvents}>
-              Ne pare rău, nu ai adăugat niciun membru al familiei sau prieten
-              încă!
+              Ne pare rău, nu ai adăugat niciun prieten încă!
             </Text>
           </View>
         )
@@ -498,6 +674,16 @@ const styles = StyleSheet.create({
     color: Colors.colors.darkDustyPurple,
   },
   containerEachOneWeek: {
+    marginTop: 16,
+  },
+  containerAll: {
+    marginTop: 16,
+    justifyContent: "center",
+  },
+  textNoBirthday: {
+    fontFamily: "Montserrat-Regular",
+    fontSize: 16,
+    color: Colors.colors.darkDustyPurple,
     marginTop: 16,
   },
 });

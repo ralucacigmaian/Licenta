@@ -175,7 +175,7 @@ function DisplayFriendsScreen({ navigation }) {
           userId,
           response,
           name.name,
-          birthday
+          birthdayToAdd
         );
         setNumberOfFriends(numberOfFriends + 1);
       } catch (error) {
@@ -326,6 +326,22 @@ function DisplayFriendsScreen({ navigation }) {
   //   console.log(giftFriendIdRef.current);
   //   navigation.navigate("Display Gift Suggestions", { id: selectedFriendId });
   // };
+
+  if (loading)
+    return (
+      <ActivityIndicator
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "white",
+        }}
+      />
+    );
 
   return (
     <ScrollView bounces={false} style={styles.container}>
@@ -563,7 +579,7 @@ function DisplayFriendsScreen({ navigation }) {
                         {currentFriend.name}
                       </Text>
                     </View>
-                    <View style={styles.profileInformationContainer}>
+                    {/* <View style={styles.profileInformationContainer}>
                       <View style={styles.profileInformation}>
                         <Text style={styles.textInformation}>
                           {currentFriend.birthday}
@@ -585,7 +601,7 @@ function DisplayFriendsScreen({ navigation }) {
                           Gender
                         </Text>
                       </View>
-                    </View>
+                    </View> */}
                     <View style={styles.profileInterestsContainer}>
                       {currentFriend.interests.map((x) => {
                         const interestObj = Interests.find(
@@ -941,8 +957,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 2,
-    borderColor: "red",
   },
   modalViewProfile: {
     flex: 0,

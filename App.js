@@ -7,6 +7,7 @@ import {
   Platform,
   Image,
   Pressable,
+  LogBox,
 } from "react-native";
 import { Colors } from "./src/utils/colors";
 import { useFonts } from "expo-font";
@@ -34,6 +35,8 @@ import PaymentScreen from "./src/screens/PaymentScreen";
 import UserProfileScreen from "./src/screens/UserProfileScreen";
 import { getImageURL } from "./src/database/database";
 import DisplayGiftHistoryScreen from "./src/screens/DisplayGiftHistoryScreen";
+import DisplayFamilyScreen from "./src/screens/DisplayFamilyScreen";
+import AddFamilyMemberScreen from "./src/screens/AddFamilyMemberScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -162,6 +165,7 @@ export default function App() {
 
   function BottomTabNavigator({ navigation }) {
     const [userPhoto, setUserPhoto] = useState();
+    const [loading, setLoading] = useState(true);
     // useEffect(() => {
     //   async function getUsersImage() {
     //     if (user) {
@@ -175,6 +179,19 @@ export default function App() {
     //   }, 10);
     //   return () => clearInterval(interval);
     // }, []);
+
+    // useEffect(() => {
+    //   async function getUsersImage() {
+    //     if (user) {
+    //       const imagePath = `users/${user.uid}.jpeg`;
+    //       const responseImage = await getImageURL(imagePath);
+    //       setUserPhoto(responseImage);
+    //       setLoading(false);
+    //     }
+    //   }
+    //   getUsersImage();
+    // }, [loading]);
+
     useFocusEffect(
       useCallback(() => {
         async function getUsersImage() {
@@ -245,6 +262,43 @@ export default function App() {
             ),
           }}
         />
+        {/* <Tab.Screen
+          name="Add Family"
+          component={DisplayFamilyScreen}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View style={{ bottom: -5 }}>
+                <Icon
+                  type={Icons.MaterialCommunityIcons}
+                  name={focused ? "account-heart" : "account-heart-outline"}
+                  size={30}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </View>
+            ),
+            tabBarLabel: "Familie",
+            tabBarLabelStyle: {
+              fontFamily: "Montserrat-SemiBold",
+              fontSize: 16,
+              color: Colors.colors.darkDustyPurple,
+            },
+            headerRight: () => (
+              <Pressable
+                style={{ marginRight: 10 }}
+                onPress={() =>
+                  navigation.navigate("Adaugă un membru al familiei")
+                }
+              >
+                <Icon
+                  type={Icons.Ionicons}
+                  name="ios-add-circle"
+                  size={35}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </Pressable>
+            ),
+          }}
+        /> */}
         <Tab.Screen
           name="Add Friends"
           component={DisplayFriendsScreen}
@@ -314,6 +368,9 @@ export default function App() {
       </UserContextProvider>
     );
   }
+
+  LogBox.ignoreLogs(["Warning: ..."]);
+  LogBox.ignoreAllLogs(true);
 
   return (
     <UserContextProvider>
@@ -392,6 +449,20 @@ export default function App() {
                 },
               }}
             />
+            {/* <Stack.Screen
+              name="Adaugă un membru al familiei"
+              component={AddFamilyMemberScreen}
+              options={{
+                headerShown: false,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 20,
+                },
+              }}
+            /> */}
             {/* <Stack.Screen name="CreateProfile" component={CreateProfileScreen} /> */}
           </Stack.Navigator>
         </NavigationContainer>

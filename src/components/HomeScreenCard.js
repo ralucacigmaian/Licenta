@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { Colors } from "../utils/colors";
 
-function HomeScreenCard({ photo, name, birthday, nameday, daysLeft }) {
+function HomeScreenCard({ photo, name, birthday, nameday, daysLeft, onPress }) {
   return (
     <View style={styles.container}>
       <View style={styles.containerImage}>
@@ -9,11 +9,18 @@ function HomeScreenCard({ photo, name, birthday, nameday, daysLeft }) {
       </View>
       <View style={styles.containerDetails}>
         <Text style={styles.textName}>{name}</Text>
-        {birthday && (
+        {birthday && daysLeft !== 0 ? (
           <View>
             <Text style={styles.textBirthday}>Ziua de naștere este</Text>
             <Text style={styles.textBirthday}>pe data de {birthday}</Text>
           </View>
+        ) : (
+          daysLeft === 0 && (
+            <View style={{ marginRight: 8 }}>
+              <Text style={styles.textBirthday}>Astăzi este ziua de</Text>
+              <Text style={styles.textBirthday}>naștere!</Text>
+            </View>
+          )
         )}
         {nameday && (
           <View>
@@ -28,6 +35,10 @@ function HomeScreenCard({ photo, name, birthday, nameday, daysLeft }) {
             <Text style={styles.textDaysLeft}>O zi</Text>
             <Text style={styles.textLeft}>rămasă</Text>
           </View>
+        ) : daysLeft === 0 ? (
+          <Pressable onPress={onPress}>
+            <Text style={styles.textTodayBirthday}>Trimite un cadou!</Text>
+          </Pressable>
         ) : (
           <View style={styles.containerDaysLeft}>
             <Text style={styles.textDaysLeft}>{daysLeft} zile</Text>
@@ -88,6 +99,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.colors.darkDustyPurple,
     textTransform: "uppercase",
+  },
+  textTodayBirthday: {
+    fontFamily: "Montserrat-Regular",
+    color: Colors.colors.darkDustyPurple,
+    textAlign: "center",
   },
 });
 
