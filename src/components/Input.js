@@ -65,7 +65,7 @@ function Input({
               onOpen={() => setOpen(true)}
               onClose={() => setOpen(false)}
               popover={<Text style={styles.error}>{error}</Text>}
-              width={200}
+              width={220}
               height={error.length + 30}
               backgroundColor={backgroundColorTooltip}
               withOverlay={false}

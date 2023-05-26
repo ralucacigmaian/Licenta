@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { Colors } from "../utils/colors";
 import Icon, { Icons } from "../components/Icons";
+import Button from "../components/Button";
 
 function GiftDetailsScreen({ route, navigation }) {
-  const { name, price, description, image, userId, friendId } = route.params;
+  const { name, price, description, image, userId, friendId, friendName } =
+    route.params;
 
-  console.log(`Gift Details Screen: ${userId} + ${friendId}`);
+  console.log(`Gift Details Screen: ${userId} + ${friendId} + ${friendName}`);
 
   return (
     <View style={styles.container}>
@@ -14,9 +16,8 @@ function GiftDetailsScreen({ route, navigation }) {
         <Text style={styles.textName}>{name}</Text>
         <Text style={styles.textDescription}>{description}</Text>
         <View style={styles.containerPriceGift}>
-          <Text style={styles.textPrice}>${price}</Text>
-          <Pressable
-            style={({ pressed }) => pressed && styles.pressed}
+          <Text style={styles.textPrice}>{price} RON</Text>
+          <Button
             onPress={() =>
               navigation.navigate("Payment", {
                 name: name,
@@ -24,19 +25,18 @@ function GiftDetailsScreen({ route, navigation }) {
                 image: image,
                 userId: userId,
                 friendId: friendId,
+                friendName: friendName,
               })
             }
+            backgroundColor={Colors.colors.darkDustyPurple}
+            color="white"
+            width={200}
+            borderRadius={10}
+            fontFamily="Montserrat-SemiBold"
+            fontSize={18}
           >
-            <View style={styles.containerButton}>
-              <Text style={styles.textSelectGift}>Select Gift</Text>
-              <Icon
-                type={Icons.Ionicons}
-                name="ios-gift"
-                size={24}
-                color="white"
-              />
-            </View>
-          </Pressable>
+            Selectează cadoul
+          </Button>
         </View>
       </View>
     </View>

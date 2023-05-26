@@ -19,7 +19,11 @@ import {
   sendPushNotificationHandler,
 } from "../notifications/notifications";
 import * as Notifications from "expo-notifications";
-import { getUsersFriend, getUsersNotification } from "../database/database";
+import {
+  getUsersFriend,
+  getUsersFriends,
+  getUsersNotification,
+} from "../database/database";
 import { getImageURL } from "../database/database";
 import Category from "../components/Category";
 import { Icons } from "../components/Icons";
@@ -111,8 +115,8 @@ function HomeScreen({ navigation }) {
           scheduleNotification(
             "Atenție! 🥳",
             `Au mai rămas ${diffDays} zile până la aniversarea lui ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
-            20,
-            44
+            13,
+            8
           );
         }
         if (diffDays === 366) {
@@ -145,7 +149,7 @@ function HomeScreen({ navigation }) {
   useFocusEffect(
     useCallback(() => {
       const fetchFriends = async () => {
-        const friendsArray = await getUsersFriend(authenticatedUser.uid);
+        const friendsArray = await getUsersFriends(authenticatedUser.uid);
         setFriends(friendsArray);
         setLoading(false);
       };
@@ -308,6 +312,7 @@ function HomeScreen({ navigation }) {
     if (friends) {
       friends.map((x) => {
         const date = new Date(x.birthday);
+        date.setDate(date.getDate() + 1);
         date.setFullYear(2023);
         const dateString = date.toISOString().split("T")[0];
         birthdays[dateString] = { marked: true };
@@ -322,6 +327,8 @@ function HomeScreen({ navigation }) {
   const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
   };
+
+  // console.log(birthdays);
 
   let isThereBirthday = false;
 

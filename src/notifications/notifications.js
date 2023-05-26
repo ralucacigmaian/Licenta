@@ -46,7 +46,11 @@ export async function registerForPushNotificationsAsync() {
   return token;
 }
 
-export function scheduleNotification(title, body, hour, minute) {
+export async function scheduleNotification(title, body, hour, minute) {
+  const { status } = await Notifications.requestPermissionsAsync();
+  if (status !== "granted") {
+    return;
+  }
   const trigger = {
     hour: hour,
     minute: minute,

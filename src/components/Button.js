@@ -1,6 +1,18 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
 
-function Button({ onPress, children, backgroundColor, color, width }) {
+function Button({
+  onPress,
+  children,
+  backgroundColor,
+  color,
+  width,
+  borderRadius,
+  textTransform,
+  fontFamily,
+  fontSize,
+  textAlign,
+  shadowOpacity,
+}) {
   return (
     <Pressable
       onPress={onPress}
@@ -11,9 +23,22 @@ function Button({ onPress, children, backgroundColor, color, width }) {
           styles.container,
           backgroundColor && { backgroundColor },
           width && { width },
+          borderRadius && { borderRadius },
+          shadowOpacity && { shadowOpacity },
         ]}
       >
-        <Text style={[styles.text, color && { color }]}>{children}</Text>
+        <Text
+          style={[
+            styles.text,
+            color && { color },
+            textTransform && { textTransform },
+            fontFamily && { fontFamily },
+            fontSize && { fontSize },
+            textAlign && { textAlign },
+          ]}
+        >
+          {children}
+        </Text>
       </View>
     </Pressable>
   );
@@ -26,18 +51,17 @@ const styles = StyleSheet.create({
   container: {
     // width: 300,
     height: 50,
-    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "black",
     shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
+    // shadowOpacity: 0.5,
     shadowRadius: 3,
   },
   text: {
-    fontFamily: "Montserrat-Light",
-    fontSize: 16,
-    textTransform: "uppercase",
+    // fontFamily: "Montserrat-Light",
+    // fontSize: 16,
+    // textTransform: "uppercase",
   },
 });
 
