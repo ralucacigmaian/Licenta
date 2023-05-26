@@ -82,7 +82,7 @@ function GiftCard({ image, name, price, description, onDetails }) {
           <Text style={styles.textName}>{name}</Text>
         </View>
         <View style={styles.containerPrice}>
-          <Text style={styles.textPrice}>${price}</Text>
+          <Text style={styles.textPrice}>{price} RON</Text>
         </View>
       </View>
     </Pressable>

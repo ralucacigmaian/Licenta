@@ -21,69 +21,230 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 
-export async function addFriend(id, gender, name, birthday, interests) {
-  const response = await axios.post(URL + `/users/${id}/friends.json`, {
-    gender: gender,
-    name: name,
-    birthday: birthday,
-    interests: interests,
+// export async function addFriend(id, gender, name, birthday, interests) {
+//   const response = await axios.post(URL + `/users/${id}/friends.json`, {
+//     gender: gender,
+//     name: name,
+//     birthday: birthday,
+//     interests: interests,
+//     receivedGift: 0,
+//     giftName: "noGiftName",
+//     giftPrice: 0,
+//     giftDate: "noGiftDate",
+//   });
+//   const friendId = response.data.name;
+
+//   return friendId;
+// }
+
+// export async function deleteFriend(userId, friendId, formattedPath) {
+//   await deleteImage(formattedPath);
+//   const response = await axios.delete(
+//     URL + `/users/${userId}/friends/${friendId}.json`
+//   );
+//   return response.data;
+// }
+
+// export async function editFriend(userId, friendId, friendData) {
+//   const response = await axios.patch(
+//     URL + `/users/${userId}/friends/${friendId}.json`,
+//     friendData
+//   );
+//   return response.data;
+// }
+
+export async function addFriend(
+  idUser,
+  idFriend,
+  name,
+  birthday,
+  interests,
+  image,
+  email,
+  phoneNumber
+) {
+  const response = await axios.post(
+    URL + `/users/${idUser}/friends/${idFriend}.json`,
+    {
+      name: name,
+      birthday: birthday,
+      interests: interests,
+      receivedGift: 0,
+      giftName: "noGiftName",
+      giftPrice: 0,
+      giftDate: "noGiftDate",
+      image: image,
+      email: email,
+      phoneNumber: phoneNumber,
+    }
+  );
+  const addedFriendId = response.data.name;
+  return addedFriendId;
+}
+
+export async function getUsersFriends(idUser) {
+  const friends = [];
+  const response = await axios.get(URL + `/users/${idUser}/friends.json`);
+  for (const x in response.data) {
+    for (const y in response.data[x]) {
+      const friendsRetrieved = {
+        birthday: response.data[x][y].birthday,
+        email: response.data[x][y].email,
+        giftDate: response.data[x][y].giftDate,
+        giftName: response.data[x][y].giftName,
+        image: response.data[x][y].image,
+        interests: response.data[x][y].interests,
+        name: response.data[x][y].name,
+        phoneNumber: response.data[x][y].phoneNumber,
+        receivedGift: response.data[x][y].receivedGift,
+        id: x,
+      };
+      friends.push(friendsRetrieved);
+    }
+  }
+  return friends;
+}
+
+export async function addFamilyMember(
+  idUser,
+  name,
+  birthday,
+  familyRelation,
+  phoneNumber,
+  interests
+) {
+  const response = await axios.post(
+    URL + `/users/${idUser}/familyMembers.json`,
+    {
+      name: name,
+      birthday: birthday,
+      familyRelation: familyRelation,
+      phoneNumber: phoneNumber,
+      interests: interests,
+      receivedGift: 0,
+      giftName: "noGiftName",
+      giftPrice: 0,
+      giftDate: "noGiftDate",
+    }
+  );
+  const addedFamilyMemberId = response.data.name;
+  return addedFamilyMemberId;
+}
+
+export async function getUsersFamilyMembers(idUser) {
+  const familyMembers = [];
+  const response = await axios.get(URL + `/users/${idUser}/familyMembers.json`);
+  for (const x in response.data) {
+    const familyMembersRetrieved = {
+      birthday: response.data[x].birthday,
+      familyRelation: response.data[x].familyRelation,
+      giftDate: response.data[x].giftDate,
+      giftName: response.data[x].giftName,
+      giftPrice: response.data[x].giftPrice,
+      interests: response.data[x].interests,
+      name: response.data[x].name,
+      phoneNumber: response.data[x].phoneNumber,
+      receivedGift: response.data[x].receivedGift,
+      id: x,
+      image: await getImageURL(`familyMembers/${idUser}/${x}.jpeg`),
+    };
+    familyMembers.push(familyMembersRetrieved);
+  }
+  return familyMembers;
+}
+
+export async function addEvent(
+  idUser,
+  eventType,
+  name1,
+  name2,
+  eventDate,
+  eventHour,
+  eventLocation
+) {
+  const response = await axios.post(URL + `/users/${idUser}/events.json`, {
+    eventType: eventType,
+    name1: name1,
+    name2: name2,
+    eventDate: eventDate,
+    eventHour: eventHour,
+    eventLocation: eventLocation,
     receivedGift: 0,
     giftName: "noGiftName",
     giftPrice: 0,
     giftDate: "noGiftDate",
   });
-  const friendId = response.data.name;
-
-  return friendId;
+  const eventId = response.data.name;
+  return eventId;
 }
 
-export async function deleteFriend(userId, friendId, formattedPath) {
-  await deleteImage(formattedPath);
-  const response = await axios.delete(
-    URL + `/users/${userId}/friends/${friendId}.json`
-  );
-  return response.data;
-}
-
-export async function editFriend(userId, friendId, friendData) {
-  const response = await axios.patch(
-    URL + `/users/${userId}/friends/${friendId}.json`,
-    friendData
-  );
-  return response.data;
-}
-
-export async function getUsersFriend(id) {
-  const friends = [];
-  const response = await axios.get(URL + `/users/${id}/friends.json`);
-  for (const key in response.data) {
-    // console.log(response.data);
-    const friendsRetrieved = {
-      gender: response.data[key].gender,
-      name: response.data[key].name,
-      birthday: response.data[key].birthday,
-      interests: response.data[key].interests,
-      receivedGift: response.data[key].receivedGift,
-      giftName: response.data[key].giftName,
-      giftPrice: response.data[key].giftPrice,
-      giftDate: response.data[key].giftDate,
-      key: key,
-      image: await getImageURL(`friends/${id}/${key}.jpeg`),
+export async function getUsersEvents(idUser) {
+  const events = [];
+  const response = await axios.get(URL + `/users/${idUser}/events.json`);
+  for (const x in response.data) {
+    const eventsRetrieved = {
+      eventDate: response.data[x].eventDate,
+      eventHour: response.data[x].eventHour,
+      eventLocation: response.data[x].eventLocation,
+      eventType: response.data[x].eventType,
+      giftDate: response.data[x].giftDate,
+      giftName: response.data[x].giftName,
+      giftPrice: response.data[x].giftPrice,
+      name1: response.data[x].name1,
+      name2: response.data[x].name2,
+      receivedGift: response.data[x].receivedGift,
+      id: x,
     };
-    // console.log(friendsRetrieved);
-    friends.push(friendsRetrieved);
+    events.push(eventsRetrieved);
   }
-  return friends;
+  return events;
 }
+
+// export async function getUsersFriend(id) {
+//   const friends = [];
+//   const response = await axios.get(URL + `/users/${id}/friends.json`);
+//   for (const key in response.data) {
+//     // console.log(response.data);
+//     const friendsRetrieved = {
+//       gender: response.data[key].gender,
+//       name: response.data[key].name,
+//       birthday: response.data[key].birthday,
+//       interests: response.data[key].interests,
+//       receivedGift: response.data[key].receivedGift,
+//       giftName: response.data[key].giftName,
+//       giftPrice: response.data[key].giftPrice,
+//       giftDate: response.data[key].giftDate,
+//       key: key,
+//       image: await getImageURL(`friends/${id}/${key}.jpeg`),
+//     };
+//     // console.log(friendsRetrieved);
+//     friends.push(friendsRetrieved);
+//   }
+//   return friends;
+// }
 
 export async function getFriendInterests(idUser, idFriend) {
   const response = await axios.get(
     URL + `/users/${idUser}/friends/${idFriend}.json`
   );
+  const key = Object.keys(response.data);
   const friendInterests = {
-    interests: response.data.interests,
+    interests: response.data[key].interests,
   };
   return friendInterests;
+}
+
+export async function getGiftSuggestions(idInterest, indexOfInterest) {
+  const response = await axios.get(
+    URL + `/interests/${idInterest}/${indexOfInterest}.json`
+  );
+  const giftsObject = {
+    giftInformation: response.data,
+    giftImage: await getImageURL(
+      `interests/${idInterest}/${indexOfInterest}.jpg`
+    ),
+  };
+  return giftsObject;
 }
 
 export async function getFemaleInterests(idInterest, indexOfInterest) {
@@ -199,4 +360,94 @@ export async function getUsersNotification(idUser) {
     }
   }
   return notificationDetails;
+}
+
+export async function addFriendRequest(idUser, idFriend) {
+  const response = await axios.post(URL + `/friendRequest.json`, {
+    idUser: idUser,
+    idFriend: idFriend,
+    requestType: "pending",
+  });
+
+  const friendRequestId = response.data.name;
+
+  return friendRequestId;
+}
+
+export async function deleteFriendRequest(idFriend) {
+  const response = await axios.get(URL + "/friendRequest.json");
+
+  const friendRequestKey = Object.keys(response.data).find(
+    (key) => response.data[key].idFriend === idFriend
+  );
+
+  if (friendRequestKey) {
+    await axios.delete(`${URL}/friendRequest/${friendRequestKey}.json`);
+  }
+
+  return friendRequestKey;
+}
+
+export async function deleteReceivedFriendRequest(idFriend) {
+  const response = await axios.get(URL + "/friendRequest.json");
+
+  const friendRequestKey = Object.keys(response.data).find((key) => {
+    return response.data[key].idUser === idFriend;
+  });
+
+  console.log(friendRequestKey);
+
+  if (friendRequestKey) {
+    await axios.delete(URL + `/friendRequest/${friendRequestKey}.json`);
+  }
+  return friendRequestKey;
+}
+
+export async function getUsersSentFriendRequests(idUser) {
+  let sentFriendRequestDetails = [];
+  const response = await axios.get(URL + `/friendRequest.json`);
+  if (response.data) {
+    const friendRequestKeys = Object.keys(response.data);
+    const friendRequests = Object.values(response.data);
+    friendRequests.map((friendRequest, index) => {
+      friendRequest.key === friendRequestKeys[index];
+    });
+    const filtered = friendRequests.filter(function (friendRequest) {
+      return friendRequest.idUser === idUser;
+    });
+    for (const key in filtered) {
+      const friendRequestsRetrieved = {
+        idUser: filtered[key].idUser,
+        idFriend: filtered[key].idFriend,
+        requestType: filtered[key].requestType,
+      };
+      sentFriendRequestDetails.push(friendRequestsRetrieved);
+    }
+  }
+  return sentFriendRequestDetails;
+}
+
+export async function getUsersReceivedFriendRequests(idUser) {
+  let receivedFriendRequestDetails = [];
+  const response = await axios.get(URL + `/friendRequest.json`);
+  if (response.data) {
+    const friendRequestKeys = Object.keys(response.data);
+    const friendRequests = Object.values(response.data);
+    friendRequests.map((friendRequest, index) => {
+      friendRequest.key === friendRequestKeys[index];
+    });
+    const filtered = friendRequests.filter(function (friendRequest) {
+      return friendRequest.idFriend === idUser;
+    });
+    for (const key in filtered) {
+      const friendRequestsRetrieved = {
+        idUser: filtered[key].idFriend,
+        idFriend: filtered[key].idUser,
+        requestType: filtered[key].requestType,
+      };
+      receivedFriendRequestDetails.push(friendRequestsRetrieved);
+    }
+  }
+  console.log(receivedFriendRequestDetails);
+  return receivedFriendRequestDetails;
 }

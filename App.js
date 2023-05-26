@@ -37,6 +37,13 @@ import { getImageURL } from "./src/database/database";
 import DisplayGiftHistoryScreen from "./src/screens/DisplayGiftHistoryScreen";
 import DisplayFamilyScreen from "./src/screens/DisplayFamilyScreen";
 import AddFamilyMemberScreen from "./src/screens/AddFamilyMemberScreen";
+import FriendRecommendationScreen from "./src/screens/FriendRecommendationScreen";
+import FlashMessage from "react-native-flash-message";
+import FriendProfileScreen from "./src/screens/FriendProfileScreen";
+import NotificationsScreen from "./src/screens/NotificationsScreen";
+import EventsScreen from "./src/screens/EventsScreen";
+import AddEventScreen from "./src/screens/AddEventScreen";
+import MapScreen from "./src/screens/MapScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -299,7 +306,7 @@ export default function App() {
             ),
           }}
         /> */}
-        <Tab.Screen
+        {/* <Tab.Screen
           name="Add Friends"
           component={DisplayFriendsScreen}
           options={{
@@ -317,6 +324,116 @@ export default function App() {
               </View>
             ),
             tabBarLabel: "Prieteni",
+            tabBarLabelStyle: {
+              fontFamily: "Montserrat-SemiBold",
+              fontSize: 16,
+              color: Colors.colors.darkDustyPurple,
+            },
+          }}
+        /> */}
+        <Tab.Screen
+          name="ContactList"
+          component={FriendRecommendationScreen}
+          options={{
+            headerShown: true,
+            headerTitle: "Contacte",
+            headerTintColor: Colors.colors.darkDustyPurple,
+            headerTitleStyle: {
+              fontFamily: "Montserrat-SemiBold",
+              fontSize: 20,
+              color: Colors.colors.darkDustyPurple,
+            },
+            tabBarIcon: ({ focused }) => (
+              <View style={{ bottom: -5 }}>
+                <Icon
+                  type={Icons.MaterialCommunityIcons}
+                  name={focused ? "contacts" : "contacts-outline"}
+                  size={30}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </View>
+            ),
+            tabBarLabel: "Contacte",
+            tabBarLabelStyle: {
+              fontFamily: "Montserrat-SemiBold",
+              fontSize: 16,
+              color: Colors.colors.darkDustyPurple,
+            },
+            headerRight: () => (
+              <Pressable
+                style={{ marginRight: 10 }}
+                onPress={() =>
+                  navigation.navigate("Adaugă un membru al familiei")
+                }
+              >
+                <Icon
+                  type={Icons.Ionicons}
+                  name="ios-add-circle"
+                  size={35}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </Pressable>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="EventList"
+          component={EventsScreen}
+          options={{
+            headerShown: true,
+            headerTitle: "Evenimente",
+            headerTintColor: Colors.colors.darkDustyPurple,
+            headerTitleStyle: {
+              fontFamily: "Montserrat-SemiBold",
+              fontSize: 20,
+              color: Colors.colors.darkDustyPurple,
+            },
+            tabBarIcon: ({ focused }) => (
+              <View style={{ bottom: -5 }}>
+                <Icon
+                  type={Icons.Ionicons}
+                  name={focused ? "ios-calendar" : "ios-calendar-outline"}
+                  size={33}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </View>
+            ),
+            tabBarLabel: "Evenimente",
+            tabBarLabelStyle: {
+              fontFamily: "Montserrat-SemiBold",
+              fontSize: 16,
+              color: Colors.colors.darkDustyPurple,
+            },
+            headerRight: () => (
+              <Pressable
+                style={{ marginRight: 10 }}
+                onPress={() => navigation.navigate("Adaugă un eveniment")}
+              >
+                <Icon
+                  type={Icons.Ionicons}
+                  name="ios-add-circle"
+                  size={35}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </Pressable>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Notifications"
+          component={NotificationsScreen}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View style={{ bottom: -5 }}>
+                <Icon
+                  type={Icons.Ionicons}
+                  name={focused ? "ios-person-add" : "ios-person-add-outline"}
+                  size={30}
+                  color={Colors.colors.darkDustyPurple}
+                />
+              </View>
+            ),
+            tabBarLabel: "Cereri de prietenie",
             tabBarLabelStyle: {
               fontFamily: "Montserrat-SemiBold",
               fontSize: 16,
@@ -364,6 +481,7 @@ export default function App() {
               />
             </Stack.Navigator>
           </NavigationContainer>
+          <FlashMessage position="top" />
         </View>
       </UserContextProvider>
     );
@@ -395,7 +513,11 @@ export default function App() {
                 headerLargeTitleShadowVisible: false,
                 headerBackTitleVisible: false,
                 headerTintColor: Colors.colors.darkDustyPurple,
-                title: null,
+                title: "Sugestii de cadouri",
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 20,
+                },
               }}
             />
             <Stack.Screen
@@ -449,11 +571,23 @@ export default function App() {
                 },
               }}
             />
-            {/* <Stack.Screen
+            <Stack.Screen
+              name="Profilul Prietenului"
+              component={FriendProfileScreen}
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: "white",
+                title: null,
+              }}
+            />
+            <Stack.Screen
               name="Adaugă un membru al familiei"
               component={AddFamilyMemberScreen}
               options={{
-                headerShown: false,
+                headerShown: true,
                 headerLargeTitleShadowVisible: false,
                 headerBackTitleVisible: false,
                 headerTintColor: Colors.colors.darkDustyPurple,
@@ -462,9 +596,37 @@ export default function App() {
                   fontSize: 20,
                 },
               }}
-            /> */}
+            />
+            <Stack.Screen
+              name="Adaugă un eveniment"
+              component={AddEventScreen}
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 20,
+                },
+              }}
+            />
+            <Stack.Screen
+              name="Map"
+              component={MapScreen}
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                title: null,
+              }}
+            />
             {/* <Stack.Screen name="CreateProfile" component={CreateProfileScreen} /> */}
           </Stack.Navigator>
+          <FlashMessage position="top" />
         </NavigationContainer>
       </View>
     </UserContextProvider>

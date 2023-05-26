@@ -16,6 +16,7 @@ export const Colors = {
     darkDustyPurple: "#594453",
     deepPurple: "#241E4D",
     gray: "#808080",
+    grayBorder: "#606060",
     backgroundColor: "#FDFFFF",
     cardBackgroundColor: "#F8F8F8",
     transparent: "#000000AA",

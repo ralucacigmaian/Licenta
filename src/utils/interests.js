@@ -1,23 +1,23 @@
 export const Interests = [
   {
     id: 0,
-    title: "Card Games, Board Games & Puzzles",
+    title: "🃏 Jocuri de cărți",
   },
   {
     id: 1,
-    title: "Video Games",
+    title: "🎮 Jocuri video",
   },
   {
     id: 2,
-    title: "Music & Festivals",
+    title: "🎶 Muzică & Festivaluri muzicale",
   },
   {
     id: 3,
-    title: "Singing",
+    title: "🎤 Interpretare vocală",
   },
   {
     id: 4,
-    title: "Beauty & Grooming",
+    title: "💄 Frumusețe & Îngrijire personală",
   },
   {
     id: 5,

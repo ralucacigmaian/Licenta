@@ -1,11 +1,13 @@
-import { useContext, useReducer, useState } from "react";
+import { useContext, useMemo, useReducer, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
+  Image,
   SafeAreaView,
   Keyboard,
   Pressable,
+  ScrollView,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Button from "../components/Button";
@@ -15,6 +17,13 @@ import { firebase } from "app/config.js";
 import * as ImagePicker from "expo-image-picker";
 import { addImage } from "../database/database";
 import { UserContext } from "../context/AuthContext";
+import Icon, { Icons } from "../components/Icons";
+import { showMessage } from "react-native-flash-message";
+import { useRef, useCallback } from "react";
+import BottomSheet from "@gorhom/bottom-sheet";
+import Interest from "../components/Interest";
+import { Interests } from "../utils/interests";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 function SignUpScreen({ navigation }) {
   const [inputs, setInputs] = useState({
@@ -48,54 +57,88 @@ function SignUpScreen({ navigation }) {
   const registerUser = async (
     email,
     name,
+    birthday,
     phoneNumber,
     password,
-    confirmPassword
+    confirmPassword,
+    interests
   ) => {
     let valid = true;
     if (!inputs.email) {
       valid = false;
-      handleError("Please input your email", "email");
+      handleError("Vă rugăm să introduceți adresa de e-mail!", "email");
     } else if (!inputs.email.match(/\S+@\S+\.\S+/)) {
       valid = false;
-      handleError("Please input a valid email", "email");
+      handleError(
+        "Vă rugăm să introduceți o adresă de e-mail validă!",
+        "email"
+      );
     }
     if (!inputs.name) {
       valid = false;
-      handleError("Please input your name", "name");
+      handleError("Vă rugăm să introduceți numele!", "name");
     }
     if (!inputs.phoneNumber) {
       valid = false;
-      handleError("Please input your phone number", "phoneNumber");
+      handleError("Vă rugăm să introduceți numărul de telefon!", "phoneNumber");
     } else if (inputs.phoneNumber.length !== 10) {
       valid = false;
-      handleError("Please input a valid phone number", "phoneNumber");
+      handleError(
+        "Vă rugăm să introduceți un număr de telefon valid!",
+        "phoneNumber"
+      );
     }
     if (!inputs.password) {
       valid = false;
-      handleError("Please input your password", "password");
+      handleError("Vă rugăm să introduceți parola!", "password");
     } else if (inputs.password.length < 8) {
       valid = false;
       handleError(
-        "Please input a password with a length of at least 8 characters",
+        "Vă rugăm să introduceți o parolă care să conțină cel puțin 8 caractere!",
         "password"
       );
     }
     if (!inputs.confirmPassword) {
       valid = false;
-      handleError("Please confirm your password", "confirmPassword");
+      handleError("Vă rugăm să confirmați parola!", "confirmPassword");
     } else if (inputs.password !== inputs.confirmPassword) {
       if (inputs.password.length === 0) {
         valid = false;
-        handleError("Please input your password firstly", "confirmPassword");
+        handleError(
+          "Vă rugăm să introduceți parola prima dată!",
+          "confirmPassword"
+        );
       } else {
         valid = false;
-        handleError("Passwords do not match", "confirmPassword");
+        handleError("Parolele nu corespund!", "confirmPassword");
       }
     }
     if (!photo) {
       valid = false;
-      handleError("Please select your profile picture!", "photo");
+      // handleError("Please select your profile picture!", "photo");
+      showMessage({
+        message: "Vă rugăm să selectați poza de profil!",
+        // description: "Încearcă să te conectezi!",
+        icon: "warning",
+        style: { backgroundColor: Colors.colors.darkDustyPurple },
+        titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+        textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
+      });
+    }
+
+    if (selectedInterests.length === 0) {
+      valid = false;
+      handleError("Vă rugăm să selectați interesele!", "interests");
+    }
+
+    if (selectedInterests.length < 5) {
+      valid = false;
+      handleError("Vă rugăm să selectați cel puțin 5 interese!", "interests");
+    }
+
+    if (birthdate === "Selectați data nașterii") {
+      valid = false;
+      handleError("Vă rugăm să selectați data nașterii!", "birthday");
     }
 
     console.log(valid);
@@ -112,7 +155,9 @@ function SignUpScreen({ navigation }) {
           .set({
             email,
             name,
+            birthdateToAdd,
             phoneNumber,
+            selectedInterests,
           })
           .catch((error) => {
             alert(error.message);
@@ -128,58 +173,24 @@ function SignUpScreen({ navigation }) {
       } catch (error) {
         // alert(error.message);
         if (error.message === firebaseErrorTypeOne) {
-          handleError("An account with this email already exists!", "email");
+          showMessage({
+            message: "Un cont cu această adresă de e-mail există deja!",
+            description: "Încearcă să te conectezi!",
+            icon: "warning",
+            style: { backgroundColor: Colors.colors.darkDustyPurple },
+            titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+            textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
+          });
+          handleError(
+            "Un cont cu această adresă de e-mail există deja!",
+            "email"
+          );
         }
       }
     }
   };
 
   const [errors, setErrors] = useState({});
-
-  // const validate = () => {
-  //   Keyboard.dismiss();
-  //   let valid = true;
-  //   if (!inputs.email) {
-  //     ok = 1;
-  //     handleError("Please input your email", "email");
-  //     valid = false;
-  //   } else if (!inputs.email.match(/\S+@\S+\.\S+/)) {
-  //     handleError("Please input a valid email", "email");
-  //   }
-  //   if (!inputs.name) {
-  //     ok = 1;
-  //     handleError("Please input your name", "name");
-  //   }
-  //   if (!inputs.phoneNumber) {
-  //     ok = 1;
-  //     handleError("Please input your phone number", "phoneNumber");
-  //   } else if (inputs.phoneNumber.length !== 10) {
-  //     ok = 1;
-  //     handleError("Please input a valid phone number", "phoneNumber");
-  //   }
-  //   if (!inputs.password) {
-  //     ok = 1;
-  //     handleError("Please input your password", "password");
-  //   } else if (inputs.password.length < 8) {
-  //     ok = 1;
-  //     handleError(
-  //       "Please input a password with a length of at least 8 characters",
-  //       "password"
-  //     );
-  //   }
-  //   if (!inputs.confirmPassword) {
-  //     ok = 1;
-  //     handleError("Please confirm your password", "confirmPassword");
-  //   } else if (inputs.password !== inputs.confirmPassword) {
-  //     if (inputs.password.length === 0) {
-  //       ok = 1;
-  //       handleError("Please input your password firstly", "confirmPassword");
-  //     } else {
-  //       ok = 1;
-  //       handleError("Passwords do not match", "confirmPassword");
-  //     }
-  //   }
-  // };
 
   const handleOnChange = (text, input) => {
     setInputs((prevState) => ({ ...prevState, [input]: text }));
@@ -189,262 +200,474 @@ function SignUpScreen({ navigation }) {
     setErrors((prevState) => ({ ...prevState, [input]: errorMessage }));
   };
 
+  const bottomSheetRef = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const snapPoints = useMemo(() => ["41%"], []);
+
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetRef.current?.present();
+    setIsOpen(true);
+  }, []);
+
+  const handleSheetChanges = useCallback((index) => {
+    console.log("handleSheetChanges", index);
+  }, []);
+
+  const [selectedInterests, setSelectedInterests] = useState([]);
+
+  const handleSelectInterests = (id) => {
+    if (selectedInterests.includes(id)) {
+      setSelectedInterests(selectedInterests.filter((i) => i !== id));
+    } else {
+      setSelectedInterests([...selectedInterests, id]);
+    }
+  };
+
+  console.log(selectedInterests);
+
+  const [date, setDate] = useState(new Date());
+  const [birthdate, setBirthdate] = useState("Selectați data nașterii");
+  const [birthdateToAdd, setBirthdateToAdd] = useState();
+  const [showPicker, setShowPicker] = useState(false);
+
+  const toggleDatePicker = () => {
+    setShowPicker(!showPicker);
+  };
+
+  const onChange = ({ type }, selectedDate) => {
+    if (type == "set") {
+      const currentDate = selectedDate;
+      setDate(currentDate);
+    } else {
+      toggleDatePicker();
+    }
+  };
+
+  const confirmDate = () => {
+    const moment = require("moment");
+    require("moment/locale/ro");
+
+    let auxDate = new Date(date);
+
+    let newDate =
+      auxDate.getDate() +
+      " " +
+      moment(auxDate).local("ro").format("MMMM") +
+      " " +
+      auxDate.getFullYear();
+
+    console.log(newDate);
+
+    setBirthdate(newDate);
+    setBirthdateToAdd(auxDate);
+
+    toggleDatePicker();
+  };
+
   return (
-    <KeyboardAwareScrollView style={styles.container}>
-      <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Welcome!</Text>
-          <Text style={styles.description}>Enter your details to Register</Text>
-          <View style={styles.form}>
-            <Text style={styles.text}>Register</Text>
-            <View style={styles.inputs}>
-              <View style={styles.input}>
-                <Input
-                  label="Email"
-                  placeholder="Enter your email address"
-                  placeholderTextColor={Colors.colors.gray}
-                  color={Colors.colors.darkDustyPurple}
-                  backgroundColor="white"
-                  backgroundColorTooltip={Colors.colors.darkDustyPurple}
-                  borderColor={Colors.colors.darkDustyPurple}
-                  iconName="mail"
-                  iconError="ios-alert-circle"
-                  iconSize={24}
-                  iconColor={Colors.colors.darkDustyPurple}
-                  style={{ fontFamily: "Montserrat-Regular" }}
-                  autoCapitalize="none"
-                  onChangeText={(text) => handleOnChange(text, "email")}
-                  error={errors.email}
-                  onFocus={() => {
-                    handleError(null, "email");
-                  }}
+    <ScrollView style={styles.container}>
+      <View style={styles.containerView}>
+        <View style={styles.containerForm}>
+          <View style={styles.containerText}>
+            <Text style={styles.textWelcome}>Bine ai venit!</Text>
+            <Text style={styles.textInformation}>
+              Completează următorul formular pentru a crea un cont
+            </Text>
+          </View>
+          <View style={styles.containerImage}>
+            {photo ? (
+              <Image source={{ uri: photo }} style={styles.image} />
+            ) : (
+              <Image
+                source={require("../utils/pickImage.jpg")}
+                style={styles.image}
+              />
+            )}
+
+            <Pressable onPress={() => handleSelectImage()}>
+              <View style={styles.containerIcon}>
+                <Icon
+                  type={Icons.MaterialIcons}
+                  name="add-to-photos"
+                  size={20}
+                  color="white"
                 />
               </View>
-              <View style={styles.input}>
-                <Input
-                  label="Name"
-                  placeholder="Enter your name"
-                  placeholderTextColor={Colors.colors.gray}
-                  color={Colors.colors.darkDustyPurple}
-                  backgroundColor="white"
-                  backgroundColorTooltip={Colors.colors.darkDustyPurple}
-                  borderColor={Colors.colors.darkDustyPurple}
-                  iconName="ios-person-circle"
-                  iconError="ios-alert-circle"
-                  iconSize={24}
-                  iconColor={Colors.colors.darkDustyPurple}
-                  style={{ fontFamily: "Montserrat-Regular" }}
-                  onChangeText={(text) => handleOnChange(text, "name")}
-                  error={errors.name}
-                  onFocus={() => {
-                    handleError(null, "name");
-                  }}
-                />
-              </View>
-              <View style={styles.input}>
-                <Input
-                  label="Phone Number"
-                  placeholder="Enter your phone number"
-                  placeholderTextColor={Colors.colors.gray}
-                  color={Colors.colors.darkDustyPurple}
-                  backgroundColor="white"
-                  backgroundColorTooltip={Colors.colors.darkDustyPurple}
-                  borderColor={Colors.colors.darkDustyPurple}
-                  iconName="ios-call"
-                  iconError="ios-alert-circle"
-                  iconSize={24}
-                  iconColor={Colors.colors.darkDustyPurple}
-                  style={{ fontFamily: "Montserrat-Regular" }}
-                  keyboarType="phone-pad"
-                  onChangeText={(text) => handleOnChange(text, "phoneNumber")}
-                  error={errors.phoneNumber}
-                  onFocus={() => {
-                    handleError(null, "phoneNumber");
-                  }}
-                  // maxLength={20}
-                />
-              </View>
-              <View style={styles.input}>
-                <Input
-                  label="Password"
-                  placeholder="Enter your password"
-                  placeholderTextColor={Colors.colors.gray}
-                  color={Colors.colors.darkDustyPurple}
-                  backgroundColor="white"
-                  backgroundColorTooltip={Colors.colors.darkDustyPurple}
-                  borderColor={Colors.colors.darkDustyPurple}
-                  iconName="lock-closed"
-                  iconError="ios-alert-circle"
-                  iconNameOn="ios-eye"
-                  iconNameOff="ios-eye-off"
-                  iconSize={24}
-                  iconColor={Colors.colors.darkDustyPurple}
-                  style={{ fontFamily: "Montserrat-Regular" }}
-                  onChangeText={(text) => handleOnChange(text, "password")}
-                  error={errors.password}
-                  onFocus={() => {
-                    handleError(null, "password");
-                  }}
-                  password
-                />
-              </View>
-              <View style={styles.input}>
-                <Input
-                  label="Confirm password"
-                  placeholder="Confirm your password"
-                  placeholderTextColor={Colors.colors.gray}
-                  color={Colors.colors.darkDustyPurple}
-                  backgroundColor="white"
-                  backgroundColorTooltip={Colors.colors.darkDustyPurple}
-                  borderColor={Colors.colors.darkDustyPurple}
-                  iconName="lock-closed"
-                  iconError="ios-alert-circle"
-                  iconNameOn="ios-eye"
-                  iconNameOff="ios-eye-off"
-                  iconSize={24}
-                  iconColor={Colors.colors.darkDustyPurple}
-                  style={{ fontFamily: "Montserrat-Regular" }}
-                  onChangeText={(text) =>
-                    handleOnChange(text, "confirmPassword")
-                  }
-                  error={errors.confirmPassword}
-                  onFocus={() => {
-                    handleError(null, "confirmPassword");
-                  }}
-                  password
-                />
-              </View>
-              <View style={styles.imageContainer}>
-                <Input
-                  label="Profile Picture"
-                  placeholder={
-                    !photo
-                      ? "Select your profile photo"
-                      : "Image uploaded successfully!"
-                  }
-                  placeholderTextColor={Colors.colors.gray}
-                  color={Colors.colors.darkDustyPurple}
-                  backgroundColor="white"
-                  backgroundColorTooltip={Colors.colors.darkDustyPurple}
-                  borderColor={Colors.colors.darkDustyPurple}
-                  iconName="ios-images"
-                  iconError="ios-alert-circle"
-                  iconSize={24}
-                  iconColor={Colors.colors.darkDustyPurple}
-                  style={{
-                    fontFamily: "Montserrat-Regular",
-                  }}
-                  error={errors.photo}
-                  onFocus={() => {
-                    handleError(null, "photo");
-                  }}
-                  onPressIn={handleSelectImage}
-                  caretHidden={true}
-                />
-              </View>
+            </Pressable>
+            <View style={styles.containerInputs}>
+              <Input
+                label="E-mail"
+                placeholder="Introduceți adresa de e-mail"
+                placeholderTextColor={Colors.colors.gray}
+                color={Colors.colors.darkDustyPurple}
+                backgroundColor="white"
+                backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                borderColor={Colors.colors.darkDustyPurple}
+                iconName="mail"
+                iconError="ios-alert-circle"
+                iconSize={24}
+                iconColor={Colors.colors.darkDustyPurple}
+                style={{ fontFamily: "Montserrat-Regular" }}
+                autoCapitalize="none"
+                onChangeText={(text) => handleOnChange(text, "email")}
+                error={errors.email}
+                onFocus={() => {
+                  handleError(null, "email");
+                }}
+              />
+              <Input
+                label="Nume"
+                placeholder="Introduceți numele"
+                placeholderTextColor={Colors.colors.gray}
+                color={Colors.colors.darkDustyPurple}
+                backgroundColor="white"
+                backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                borderColor={Colors.colors.darkDustyPurple}
+                iconName="ios-person-circle"
+                iconError="ios-alert-circle"
+                iconSize={28}
+                iconColor={Colors.colors.darkDustyPurple}
+                style={{ fontFamily: "Montserrat-Regular" }}
+                onChangeText={(text) => handleOnChange(text, "name")}
+                error={errors.name}
+                onFocus={() => {
+                  handleError(null, "name");
+                }}
+              />
+              <Input
+                label="Date nașterii"
+                placeholder={birthdate}
+                placeholderTextColor={Colors.colors.gray}
+                color={Colors.colors.darkDustyPurple}
+                backgroundColor="white"
+                backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                borderColor={Colors.colors.darkDustyPurple}
+                iconName="ios-calendar"
+                iconError="ios-alert-circle"
+                iconSize={24}
+                iconColor={Colors.colors.darkDustyPurple}
+                style={{ fontFamily: "Montserrat-Regular" }}
+                error={errors.birthday}
+                onFocus={() => {
+                  handleError(null, "birthday");
+                }}
+                caretHidden={true}
+                onPressIn={toggleDatePicker}
+              />
+              {showPicker && (
+                <View>
+                  <DateTimePicker
+                    mode="date"
+                    display="spinner"
+                    value={date}
+                    onChange={onChange}
+                    style={styles.containerDatePicker}
+                    maximumDate={new Date()}
+                    textColor={Colors.colors.darkDustyPurple}
+                  />
+                  <View style={styles.containerButtons}>
+                    <Button
+                      backgroundColor="white"
+                      color={Colors.colors.darkDustyPurple}
+                      width={100}
+                      borderRadius={30}
+                      fontFamily="Montserrat-SemiBold"
+                      fontSize={14}
+                      onPress={toggleDatePicker}
+                      shadowOpacity={0.5}
+                    >
+                      Anulează
+                    </Button>
+                    <Button
+                      backgroundColor={Colors.colors.darkDustyPurple}
+                      color="white"
+                      width={100}
+                      borderRadius={30}
+                      fontFamily="Montserrat-SemiBold"
+                      fontSize={14}
+                      onPress={confirmDate}
+                      shadowOpacity={0.5}
+                    >
+                      Confirmă
+                    </Button>
+                  </View>
+                </View>
+              )}
+              <Input
+                label="Numărul de telefon"
+                placeholder="Introduceți numărul de telefon"
+                placeholderTextColor={Colors.colors.gray}
+                color={Colors.colors.darkDustyPurple}
+                backgroundColor="white"
+                backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                borderColor={Colors.colors.darkDustyPurple}
+                iconName="ios-call"
+                iconError="ios-alert-circle"
+                iconSize={24}
+                iconColor={Colors.colors.darkDustyPurple}
+                style={{ fontFamily: "Montserrat-Regular" }}
+                keyboarType="phone-pad"
+                onChangeText={(text) => handleOnChange(text, "phoneNumber")}
+                error={errors.phoneNumber}
+                onFocus={() => {
+                  handleError(null, "phoneNumber");
+                }}
+              />
+              <Input
+                label="Parolă"
+                placeholder="Introduceți parola"
+                placeholderTextColor={Colors.colors.gray}
+                color={Colors.colors.darkDustyPurple}
+                backgroundColor="white"
+                backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                borderColor={Colors.colors.darkDustyPurple}
+                iconName="lock-closed"
+                iconError="ios-alert-circle"
+                iconNameOn="ios-eye"
+                iconNameOff="ios-eye-off"
+                iconSize={24}
+                iconColor={Colors.colors.darkDustyPurple}
+                style={{ fontFamily: "Montserrat-Regular" }}
+                onChangeText={(text) => handleOnChange(text, "password")}
+                error={errors.password}
+                onFocus={() => {
+                  handleError(null, "password");
+                }}
+                password
+              />
+              <Input
+                label="Confirmă parola"
+                placeholder="Reintroduceți parola"
+                placeholderTextColor={Colors.colors.gray}
+                color={Colors.colors.darkDustyPurple}
+                backgroundColor="white"
+                backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                borderColor={Colors.colors.darkDustyPurple}
+                iconName="lock-closed"
+                iconError="ios-alert-circle"
+                iconNameOn="ios-eye"
+                iconNameOff="ios-eye-off"
+                iconSize={24}
+                iconColor={Colors.colors.darkDustyPurple}
+                style={{ fontFamily: "Montserrat-Regular" }}
+                onChangeText={(text) => handleOnChange(text, "confirmPassword")}
+                error={errors.confirmPassword}
+                onFocus={() => {
+                  handleError(null, "confirmPassword");
+                }}
+                password
+              />
+              <Input
+                label="Interese"
+                placeholder="Selectați interesele"
+                placeholderTextColor={Colors.colors.gray}
+                color={Colors.colors.darkDustyPurple}
+                backgroundColor="white"
+                backgroundColorTooltip={Colors.colors.darkDustyPurple}
+                borderColor={Colors.colors.darkDustyPurple}
+                iconName="ios-book"
+                iconError="ios-alert-circle"
+                iconSize={24}
+                iconColor={Colors.colors.darkDustyPurple}
+                style={{ fontFamily: "Montserrat-Regular" }}
+                error={errors.interests}
+                onFocus={() => {
+                  handleError(null, "interests");
+                }}
+                onPressIn={handlePresentModalPress}
+                caretHidden={true}
+              />
             </View>
-            <View style={styles.buttonContainer}>
+            <View style={styles.containerButton}>
               <Button
-                color="white"
-                backgroundColor={Colors.colors.darkDustyPurple}
-                width={200}
-                onPress={() => {
+                onPress={() =>
                   registerUser(
                     inputs.email,
                     inputs.name,
+                    birthdateToAdd,
                     inputs.phoneNumber,
-                    inputs.password
-                  );
-                }}
+                    inputs.password,
+                    selectedInterests
+                  )
+                }
+                backgroundColor={Colors.colors.darkDustyPurple}
+                color="white"
+                width={280}
+                borderRadius={10}
+                fontFamily="Montserrat-SemiBold"
+                fontSize={16}
+                shadowOpacity={0.5}
               >
-                Register
+                Înregistrează-te
               </Button>
             </View>
           </View>
         </View>
-        <View style={styles.footer}>
-          <Text style={styles.textFooter}>Already have an account? Login </Text>
-          <Pressable style={({ pressed }) => pressed && styles.pressed}>
-            <Text
-              style={styles.textHere}
-              onPress={() => navigation.navigate("SignIn")}
-            >
-              here
-            </Text>
-          </Pressable>
+        <View style={styles.containerFooter}>
+          <Text style={styles.textFooter}>
+            Dacă ai deja un cont, te poți conecta{" "}
+          </Text>
+          <Text
+            style={styles.textHere}
+            onPress={() => navigation.navigate("SignIn")}
+          >
+            aici
+          </Text>
+          <Text style={styles.textFooter}>.</Text>
         </View>
-      </SafeAreaView>
-    </KeyboardAwareScrollView>
+        {isOpen ? (
+          <BottomSheet
+            ref={bottomSheetRef}
+            snapPoints={snapPoints}
+            onChange={handleSheetChanges}
+            enablePanDownToClose={true}
+            onClose={() => setIsOpen(false)}
+            style={styles.shadow}
+          >
+            <View style={styles.containerBottomSheet}>
+              <Text style={styles.textBottomSheet}>
+                Selectați cel puțin 5 interese
+              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  flexWrap: "wrap",
+                  marginTop: 16,
+                  justifyContent: "center",
+                }}
+              >
+                {Interests.map((x) => (
+                  <View style={styles.interest}>
+                    <Interest
+                      key={x.id}
+                      onPress={() => handleSelectInterests(x.id)}
+                      active={selectedInterests.includes(x.id)}
+                    >
+                      {x.title}
+                    </Interest>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </BottomSheet>
+        ) : null}
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
     flex: 1,
+    backgroundColor: "white",
+    // alignItems: "center",
+    // justifyContent: "space-evenly",
   },
-  header: {
+  containerView: {
     justifyContent: "center",
     alignItems: "center",
   },
-  title: {
-    fontFamily: "Montserrat-Regular",
-    fontSize: 32,
+  containerForm: {
+    width: "90%",
+    backgroundColor: Colors.colors.cardBackgroundColor,
+    borderRadius: 10,
+  },
+  containerText: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 16,
+  },
+  textWelcome: {
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 24,
     color: Colors.colors.darkDustyPurple,
   },
-  description: {
-    fontFamily: "Montserrat-Light",
+  textInformation: {
+    fontFamily: "Montserrat-Regular",
     fontSize: 16,
     color: Colors.colors.darkDustyPurple,
-    paddingTop: 4,
+    textAlign: "center",
+    marginTop: 16,
   },
-  form: {
+  containerImage: {
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 8,
-    backgroundColor: Colors.colors.dustyPurple,
-    width: "80%",
-    height: 680,
-    shadowColor: "black",
-    shadowOffset: { width: 2, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    borderRadius: 10,
+  },
+  image: {
+    width: 130,
+    height: 130,
+    borderRadius: 130,
+  },
+  containerIcon: {
+    borderWidth: 1,
+    borderColor: Colors.colors.cardBackgroundColor,
+    backgroundColor: Colors.colors.darkDustyPurple,
+    shadowColor: Colors.colors.gray,
+    shadowOffset: { width: 1, height: 1 },
+    shadowOpacity: 1,
+    height: 40,
+    width: 40,
+    borderRadius: 30,
+    bottom: 40,
+    left: 40,
     justifyContent: "center",
     alignItems: "center",
   },
-  text: {
-    padding: 8,
-    textAlign: "center",
-    fontFamily: "Montserrat-Regular",
-    fontSize: 28,
-    color: Colors.colors.darkDustyPurple,
-    textTransform: "uppercase",
+  containerInputs: {
+    marginTop: -42,
   },
-  inputs: {
-    paddingRight: 20,
-    paddingLeft: 20,
-  },
-  input: {},
-  buttonContainer: {
+  containerButton: {
+    marginTop: 8,
     marginBottom: 16,
-    marginTop: 4,
   },
-  footer: {
-    paddingTop: 30,
+  containerFooter: {
+    marginTop: 4,
     flexDirection: "row",
-    justifyContent: "center",
+    marginBottom: 24,
   },
   textFooter: {
     fontFamily: "Montserrat-Regular",
-    fontSize: 14,
+    fontSize: 16,
     color: Colors.colors.darkDustyPurple,
   },
   textHere: {
     fontFamily: "Montserrat-SemiBold",
-    fontSize: 14,
+    fontSize: 16,
     color: Colors.colors.darkDustyPurple,
   },
-  pressed: {
-    opacity: 0.5,
+  containerBottomSheet: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  textBottomSheet: {
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 18,
+    color: Colors.colors.darkDustyPurple,
+  },
+  shadow: {
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 12,
+    },
+    shadowOpacity: 0.58,
+    shadowRadius: 16.0,
+
+    elevation: 24,
+  },
+  interest: {
+    marginHorizontal: 4,
+    marginVertical: 4,
+  },
+  containerDatePicker: {
+    height: 120,
+    width: 280,
+  },
+  containerButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 16,
   },
 });
 

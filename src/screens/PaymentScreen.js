@@ -10,11 +10,13 @@ import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import { Colors } from "../utils/colors";
 import { editFriend } from "../database/database";
 import { useState } from "react";
+import Button from "../components/Button";
+import { showMessage } from "react-native-flash-message";
 
 const API_URL = "http://localhost:3000";
 
 function PaymentScreen({ route, navigation }) {
-  const { name, price, image, userId, friendId } = route.params;
+  const { name, price, image, userId, friendId, friendName } = route.params;
   const newPrice = price + "00";
   console.log(newPrice);
 
@@ -25,7 +27,7 @@ function PaymentScreen({ route, navigation }) {
 
   // console.log(formattedDate);
 
-  console.log(`Payment Screen: ${userId} + ${friendId}`);
+  console.log(`Payment Screen: ${userId} + ${friendId} + ${friendName}`);
 
   const stripe = useStripe();
 
@@ -78,53 +80,62 @@ function PaymentScreen({ route, navigation }) {
         },
       });
       if (initSheet.error) {
-        return Alert.alert(initSheet.error.message);
-        // showMessage({
-        //   message: "The payment could not be initilized!",
-        //   floating: true,
-        //   // position: top,
-        //   icon: "info",
-        //   backgroundColor: Colors.colors.darkDustyPurple,
-        //   color: "white",
-        // });
-        // return;
+        // return Alert.alert(initSheet.error.message);
+        showMessage({
+          message: "Plata nu a putut fi inițializată! Încearcă din nou!",
+          // floating: true,
+          // position: top,
+          icon: "warning",
+          style: { backgroundColor: Colors.colors.darkDustyPurple },
+          titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+          textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
+        });
+        return;
       }
       const presentSheet = await stripe.presentPaymentSheet({
         clientSecret,
       });
       if (presentSheet.error) {
-        // showMessage({
-        //   message: "The payment could not go through!",
-        //   floating: true,
-        //   // position: top,
-        //   icon: "info",
-        //   backgroundColor: Colors.colors.darkDustyPurple,
-        //   color: "white",
-        // });
-        // return;
-        return Alert.alert(
-          "The payment has been canceled!",
-          "Please try again!",
-          [
-            {
-              text: "OK",
-              onPress: () => console.log("Cancel Pressed"),
-              style: "default",
-            },
-          ]
-        );
+        showMessage({
+          message: "Plata a fost anulată! Încearcă din nou!",
+          // floating: true,
+          // position: top,
+          icon: "warning",
+          style: { backgroundColor: Colors.colors.darkDustyPurple },
+          titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+          textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
+        });
+        return;
       }
-      Alert.alert("Payment complete, thank you!");
-      editFriend(userId, friendId, {
-        receivedGift: 1,
-        giftName: name,
-        giftPrice: price,
-        giftDate: formattedDate,
+      showMessage({
+        message: "Plata a fost înregistrată cu succes! Vă mulțumim!",
+        // floating: true,
+        // position: top,
+        icon: "warning",
+        style: { backgroundColor: Colors.colors.darkDustyPurple },
+        titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+        textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
       });
+      // editFriend(userId, friendId, {
+      //   receivedGift: 1,
+      //   giftName: name,
+      //   giftPrice: price,
+      //   giftDate: formattedDate,
+      // });
       navigation.navigate("Bottom Navigator");
     } catch (error) {
       console.log(error);
-      Alert.alert("Something went wrong, try again later!");
+      // Alert.alert("Something went wrong, try again later!");
+      showMessage({
+        message: "A apărut o eroare, încearcă mai târziu!",
+        // floating: true,
+        // position: top,
+        icon: "warning",
+        style: { backgroundColor: Colors.colors.darkDustyPurple },
+        titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+        textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
+      });
+      return;
     }
   };
 
@@ -136,19 +147,23 @@ function PaymentScreen({ route, navigation }) {
       <View style={styles.container}>
         <View style={styles.containerGift}>
           <Text style={styles.textGift}>
-            You have chosen the following gift
+            Ai ales următorul cadou pentru {friendName}
           </Text>
           <Image source={{ uri: image }} style={styles.image} />
           <Text style={styles.textName}>{name}</Text>
         </View>
         <View style={styles.containerButton}>
-          <TouchableOpacity
-            style={styles.button}
-            activeOpacity={0.9}
+          <Button
             onPress={subscribe}
+            backgroundColor={Colors.colors.darkDustyPurple}
+            color="white"
+            width={200}
+            borderRadius={10}
+            fontFamily="Montserrat-SemiBold"
+            fontSize={18}
           >
-            <Text style={styles.textButton}>Proceed to checkout</Text>
-          </TouchableOpacity>
+            Efectuează plata
+          </Button>
         </View>
       </View>
     </StripeProvider>

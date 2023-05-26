@@ -1,29 +1,56 @@
-import { useState, useEffect } from "react";
-import { View, Text, StyleSheet, SafeAreaView } from "react-native";
-import { firebase } from "app/config.js";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { UserContext } from "../context/AuthContext";
+import { getUsersEvents } from "../database/database";
+import EventCard from "../components/EventCard";
+import { Colors } from "../utils/colors";
 
-function CreateProfileScreen() {
-  const [name, setName] = useState("");
+function EventsScreen() {
+  const authenticatedUser = useContext(UserContext);
+  const [eventsArray, setEventsArray] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    firebase
-      .firestore()
-      .collection("users")
-      .doc(firebase.auth().currentUser.uid)
-      .get()
-      .then((snapshot) => {
-        if (snapshot.exists) {
-          setName(snapshot.data());
-        } else {
-          console.log("User doesn't exist");
-        }
+  useFocusEffect(
+    useCallback(() => {
+      const getEvents = async () => {
+        const responseEvents = await getUsersEvents(authenticatedUser.uid);
+        setEventsArray(responseEvents);
+        setLoading(false);
+      };
+
+      getEvents().catch((error) => {
+        console.log("Error getting events: ", error);
       });
-  }, []);
+    }, [])
+  );
+
+  if (loading) return <ActivityIndicator />;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text>Hello, {name.name}, it's time to create your profile!</Text>
-    </SafeAreaView>
+    <View style={styles.container}>
+      <Text style={styles.textEvents}>Evenimente</Text>
+      <View style={styles.containerEvents}>
+        {eventsArray.length > 0 ? (
+          eventsArray.map((x) => {
+            return (
+              <View style={styles.containerEvent}>
+                <EventCard
+                  eventType={x.eventType}
+                  name1={x.name1}
+                  name2={x.name2}
+                  date={x.eventDate}
+                  hour={x.eventHour}
+                  location={x.eventLocation}
+                />
+              </View>
+            );
+          })
+        ) : (
+          <Text>Ne pare rău, nu există evenimente adăugate!</Text>
+        )}
+      </View>
+    </View>
   );
 }
 
@@ -32,6 +59,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "white",
   },
+  textEvents: {
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 20,
+    color: Colors.colors.darkDustyPurple,
+    marginLeft: 16,
+  },
+  containerEvents: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  containerEvent: {
+    marginTop: 16,
+  },
 });
 
-export default CreateProfileScreen;
+export default EventsScreen;

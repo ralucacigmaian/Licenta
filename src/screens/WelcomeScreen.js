@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, Image, SafeAreaView } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "../utils/colors";
 import Button from "../components/Button";
-
+import LottieView from "lottie-react-native";
 function WelcomeScreen({ navigation }) {
   function onPressSignIn() {
     navigation.navigate("SignIn");
@@ -21,26 +21,33 @@ function WelcomeScreen({ navigation }) {
         // Colors.colors.rosy,
         // Colors.colors.pink,
         Colors.colors.dustyPurple,
+        "white",
       ]}
       style={styles.backgroundContainer}
     >
       <SafeAreaView style={styles.container}>
         <View style={styles.imageContainer}>
-          <Image
-            source={require("app/assets/imageBoardScreen.png")}
-            style={styles.image}
+          <LottieView
+            source={require("../utils/homeScreen2.json")}
+            autoPlay
+            loop
+            style={{
+              width: 300,
+              height: 300,
+            }}
           />
         </View>
         <View style={styles.textContainer}>
-          <Text style={styles.title}>Let's Get Social!</Text>
-          <Text style={styles.description}>
-            Meeting new people who share your interest in the gaming community
-            can be an exciting and rewarding experience. Whether you're a
-            seasoned gamer or just starting out, connecting with others who
-            enjoy playing video games can open up new opportunities for fun,
-            socializing, and personal growth.
+          <Text style={styles.title}>
+            Stai la curent cu evenimentele din viața ta!
           </Text>
-          <Text style={styles.footer}>Begin your journey now!</Text>
+          <Text style={styles.description}>
+            Zilele de naștere și zilele onomastice sunt momente speciale în
+            viața noastră, atât pentru noi cât și pentru familia și prietenii
+            noștri. Astfel, poți fi informat despre aniversările prietenilor,
+            având șansa de a le oferi cadouri!
+          </Text>
+          <Text style={styles.footer}>Înregistrează-te chiar acum!</Text>
         </View>
         <View style={styles.buttonsContainer}>
           <View style={styles.buttons}>
@@ -49,18 +56,26 @@ function WelcomeScreen({ navigation }) {
               color="white"
               onPress={onPressSignIn}
               width={300}
+              borderRadius={10}
+              fontFamily="Montserrat-SemiBold"
+              fontSize={18}
+              shadowOpacity={0.5}
             >
-              Login
+              Conectează-te
             </Button>
           </View>
           <View style={styles.buttons}>
             <Button
-              backgroundColor={Colors.colors.darkDustyPurple}
-              color="white"
+              backgroundColor="white"
+              color={Colors.colors.darkDustyPurple}
               onPress={onPressSignUp}
               width={300}
+              borderRadius={10}
+              fontFamily="Montserrat-SemiBold"
+              fontSize={18}
+              shadowOpacity={0.5}
             >
-              Create an account
+              Creează un cont
             </Button>
           </View>
         </View>
@@ -77,7 +92,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "space-evenly",
     alignItems: "center",
   },
   imageContainer: {
@@ -92,10 +107,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    fontFamily: "Montserrat-Regular",
-    fontSize: 36,
-    marginTop: 16,
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 28,
+    // marginTop: 16,
     color: Colors.colors.darkDustyPurple,
+    textAlign: "center",
   },
   description: {
     fontFamily: "Montserrat-Light",
@@ -106,12 +122,12 @@ const styles = StyleSheet.create({
     color: Colors.colors.darkDustyPurple,
   },
   footer: {
-    fontFamily: "Montserrat-Regular",
+    fontFamily: "Montserrat-SemiBold",
     fontSize: 24,
     color: Colors.colors.darkDustyPurple,
   },
   buttonsContainer: {
-    padding: 36,
+    padding: 30,
   },
   buttons: {
     padding: 8,
