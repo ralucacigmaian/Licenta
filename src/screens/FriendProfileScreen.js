@@ -1,5 +1,13 @@
 import { useState, useContext, useEffect } from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  Modal,
+  SafeAreaView,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "../utils/colors";
 import { Interests } from "../utils/interests";
@@ -8,6 +16,8 @@ import Button from "../components/Button";
 import {
   addFriendRequest,
   addNotification,
+  deleteFamilyMember,
+  deleteFriend,
   deleteFriendRequest,
 } from "../database/database";
 import {
@@ -18,6 +28,8 @@ import {
 } from "../database/database";
 import { UserContext } from "../context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
+import Icon, { Icons } from "../components/Icons";
+import { showMessage } from "react-native-flash-message";
 
 function FriendProfileScreen({ route }) {
   const {
@@ -32,6 +44,8 @@ function FriendProfileScreen({ route }) {
     isGift,
     familyRelation,
   } = route.params;
+
+  console.log(`idUser: ${idUser} + idFriend: ${idFriend}`);
 
   const birthdate = new Date(birthday);
   const ageDifMs = Date.now() - birthdate.getTime();
@@ -73,6 +87,94 @@ function FriendProfileScreen({ route }) {
     };
     getReceivedFriendRequests();
   }, []);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOptions = () => {
+    setIsOpen(true);
+    if (email) {
+      console.log("prieten");
+    } else {
+      console.log("familie");
+    }
+  };
+
+  const handleDeleteFamilyMember = () => {
+    if (!email) {
+      let formattedPath = `familyMembers/${idUser}/${idFriend}.jpeg`;
+      deleteFamilyMember(idUser, idFriend, formattedPath)
+        .then(() => {
+          console.log(`Family member ${idFriend} was deleted successfully!`);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      navigation.navigate("ContactList");
+      showMessage({
+        message: `Membrul familiei ${name} a fost șters cu succes!`,
+        icon: "info",
+        style: { backgroundColor: Colors.colors.darkDustyPurple },
+        titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+        textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
+      });
+    }
+  };
+
+  const handleEditFamilyMember = () => {
+    if (!email) {
+      navigation.navigate("EditFamilyMember", {
+        idUser: idUser,
+        idFamilyMember: idFriend,
+        name: name,
+        image: image,
+        birthday: birthday,
+        familyRelation: familyRelation,
+        phoneNumber: phoneNumber,
+        interests: interests,
+      });
+      setIsOpen(false);
+    }
+  };
+
+  const handleDeleteFriend = () => {
+    if (email) {
+      deleteFriend(idUser, idFriend)
+        .then(() => {
+          console.log(`Friend ${idFriend} was deleted successfully!`);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      navigation.navigate("ContactList");
+      showMessage({
+        message: `Prietenul ${name} a fost șters cu succes!`,
+        icon: "info",
+        style: { backgroundColor: Colors.colors.darkDustyPurple },
+        titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
+        textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
+      });
+    }
+  };
+
+  if (isGift) {
+    navigation.setOptions({
+      headerRight: () => {
+        return (
+          <Pressable
+            style={({ pressed }) => pressed && styles.pressed}
+            onPress={handleOptions}
+          >
+            <Icon
+              type={Icons.SimpleLineIcons}
+              name="options-vertical"
+              size={20}
+              color="white"
+            />
+          </Pressable>
+        );
+      },
+    });
+  }
 
   //   useEffect(() => {
   //     if (usersSentRequests) {
@@ -195,6 +297,75 @@ function FriendProfileScreen({ route }) {
   return (
     <View style={styles.container}>
       <StatusBar style="light" />
+      <Modal visible={isOpen} transparent={true} animationType="fade">
+        <SafeAreaView style={styles.containerModal}>
+          <View style={styles.modalView}>
+            <Pressable
+              style={({ pressed }) => pressed && styles.pressed}
+              onPress={() => setIsOpen(false)}
+            >
+              <Icon
+                type={Icons.Ionicons}
+                name="ios-close"
+                size={18}
+                color={Colors.colors.gray}
+              />
+            </Pressable>
+            <View style={styles.containerButtons}>
+              {email ? (
+                <View>
+                  <Button
+                    backgroundColor={Colors.colors.darkDustyPurple}
+                    color="white"
+                    width={280}
+                    borderRadius={10}
+                    fontFamily="Montserrat-SemiBold"
+                    fontSize={16}
+                    shadowOpacity={0.5}
+                    textAlign="center"
+                    onPress={handleDeleteFriend}
+                  >
+                    Șterge prietenul
+                  </Button>
+                </View>
+              ) : (
+                <View>
+                  <View style={styles.containerButtonModal}>
+                    <Button
+                      backgroundColor="white"
+                      color={Colors.colors.darkDustyPurple}
+                      width={280}
+                      borderRadius={10}
+                      fontFamily="Montserrat-SemiBold"
+                      fontSize={16}
+                      shadowOpacity={0.5}
+                      textAlign="center"
+                      onPress={handleEditFamilyMember}
+                    >
+                      Editează date despre membrul familiei
+                    </Button>
+                  </View>
+                  <View style={styles.containerButtonModal}>
+                    <Button
+                      backgroundColor={Colors.colors.darkDustyPurple}
+                      color="white"
+                      width={280}
+                      borderRadius={10}
+                      fontFamily="Montserrat-SemiBold"
+                      fontSize={16}
+                      shadowOpacity={0.5}
+                      textAlign="center"
+                      onPress={handleDeleteFamilyMember}
+                    >
+                      Șterge membrul familiei
+                    </Button>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
       <Image source={{ uri: image }} style={styles.image} />
       <View style={styles.containerInformation}>
         <Text style={styles.textName}>{name}</Text>
@@ -437,6 +608,29 @@ const styles = StyleSheet.create({
   },
   button: {
     marginHorizontal: 16,
+  },
+  pressed: {
+    opacity: 0.1,
+  },
+  containerModal: {
+    flex: 1,
+    backgroundColor: Colors.colors.transparent,
+    justifyContent: "center",
+  },
+  modalView: {
+    margin: 16,
+    backgroundColor: Colors.colors.backgroundColor,
+    borderRadius: 10,
+    padding: 16,
+    // alignItems: "center",
+    // flexDirection: "column",
+  },
+  containerButtons: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  containerButtonModal: {
+    marginTop: 16,
   },
 });
 

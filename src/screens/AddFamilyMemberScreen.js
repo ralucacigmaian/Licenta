@@ -291,42 +291,6 @@ function AddFamilyMemberScreen({ navigation }) {
               caretHidden={true}
               onPressIn={toggleDatePicker}
             />
-            <View style={styles.containerDropDown}>
-              <Text style={styles.textDropDown}>Gradul de rudenie</Text>
-              <SelectList
-                setSelected={setSelectFamilyRelation}
-                data={dataList}
-                fontFamily="Montserrat-Regular"
-                search={false}
-                placeholder="       Selectați gradul de rudenie"
-                boxStyles={{
-                  backgroundColor: "white",
-                  borderColor: errorFamilyRelation
-                    ? "red"
-                    : Colors.colors.grayBorder,
-                }}
-                inputStyles={{
-                  color: Colors.colors.gray,
-                }}
-                dropdownStyles={{ backgroundColor: "white" }}
-                dropdownTextStyles={{ color: Colors.colors.darkDustyPurple }}
-                arrowicon={
-                  <View
-                    style={{
-                      left: -222,
-                    }}
-                  >
-                    <Icon
-                      type={Icons.MaterialCommunityIcons}
-                      name="account-heart"
-                      size={19}
-                      color={Colors.colors.darkDustyPurple}
-                    />
-                  </View>
-                }
-                onSelect={() => console.log(selectFamilyRelation)}
-              />
-            </View>
             {showPicker && (
               <View>
                 <DateTimePicker
@@ -366,6 +330,42 @@ function AddFamilyMemberScreen({ navigation }) {
                 </View>
               </View>
             )}
+            <View style={styles.containerDropDown}>
+              <Text style={styles.textDropDown}>Gradul de rudenie</Text>
+              <SelectList
+                setSelected={setSelectFamilyRelation}
+                data={dataList}
+                fontFamily="Montserrat-Regular"
+                search={false}
+                placeholder="       Selectați gradul de rudenie"
+                boxStyles={{
+                  backgroundColor: "white",
+                  borderColor: errorFamilyRelation
+                    ? "red"
+                    : Colors.colors.grayBorder,
+                }}
+                inputStyles={{
+                  color: Colors.colors.gray,
+                }}
+                dropdownStyles={{ backgroundColor: "white" }}
+                dropdownTextStyles={{ color: Colors.colors.darkDustyPurple }}
+                arrowicon={
+                  <View
+                    style={{
+                      left: -222,
+                    }}
+                  >
+                    <Icon
+                      type={Icons.MaterialCommunityIcons}
+                      name="account-heart"
+                      size={19}
+                      color={Colors.colors.darkDustyPurple}
+                    />
+                  </View>
+                }
+                onSelect={() => console.log(selectFamilyRelation)}
+              />
+            </View>
             <Input
               label="Numărul de telefon"
               placeholder="Introduceți numărul de telefon"

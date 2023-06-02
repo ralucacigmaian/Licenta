@@ -82,6 +82,15 @@ export async function addFriend(
   return addedFriendId;
 }
 
+export async function deleteFriend(idUser, idFriend) {
+  const responseDeleteMyFriend = await axios.delete(
+    URL + `/users/${idUser}/friends/${idFriend}.json`
+  );
+  const responseDeleteYourFriend = await axios.delete(
+    URL + `/users/${idFriend}/friends/${idUser}.json`
+  );
+}
+
 export async function getUsersFriends(idUser) {
   const friends = [];
   const response = await axios.get(URL + `/users/${idUser}/friends.json`);
@@ -129,6 +138,30 @@ export async function addFamilyMember(
   );
   const addedFamilyMemberId = response.data.name;
   return addedFamilyMemberId;
+}
+
+export async function deleteFamilyMember(
+  idUser,
+  idFamilyMember,
+  formattedPath
+) {
+  const response = await axios.delete(
+    URL + `/users/${idUser}/familyMembers/${idFamilyMember}.json`
+  );
+  await deleteImage(formattedPath);
+  return response;
+}
+
+export async function editFamilyMember(
+  idUser,
+  idFamilyMember,
+  familyMemberData
+) {
+  const response = await axios.patch(
+    URL + `/users/${idUser}/familyMembers/${idFamilyMember}.json`,
+    familyMemberData
+  );
+  return response.data;
 }
 
 export async function getUsersFamilyMembers(idUser) {

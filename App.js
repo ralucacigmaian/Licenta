@@ -11,7 +11,8 @@ import {
 } from "react-native";
 import { Colors } from "./src/utils/colors";
 import { useFonts } from "expo-font";
-import AppLoading from "expo-app-loading";
+// import AppLoading from "expo-app-loading";
+import * as SplashScreen from "expo-splash-screen";
 import {
   NavigationContainer,
   useFocusEffect,
@@ -44,6 +45,7 @@ import NotificationsScreen from "./src/screens/NotificationsScreen";
 import EventsScreen from "./src/screens/EventsScreen";
 import AddEventScreen from "./src/screens/AddEventScreen";
 import MapScreen from "./src/screens/MapScreen";
+import EditFamilyMemberScreen from "./src/screens/EditFamilyMemberScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -146,6 +148,20 @@ export default function App() {
     "Monserrat-Variable": require("app/assets/fonts/Montserrat-VariableFont_wght.ttf"),
   });
 
+  useEffect(() => {
+    async function prepare() {
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.log(error);
+      } finally {
+        SplashScreen.hideAsync();
+      }
+    }
+
+    prepare();
+  }, []);
+
   function onAuthStateChanged(user) {
     setUser(user);
     if (initializing) {
@@ -165,7 +181,7 @@ export default function App() {
   }
 
   if (!fontsLoaded) {
-    return <AppLoading />;
+    return null;
   }
 
   // getUsersImage();
@@ -622,6 +638,21 @@ export default function App() {
                 headerBackTitleVisible: false,
                 headerTintColor: Colors.colors.darkDustyPurple,
                 title: null,
+              }}
+            />
+            <Stack.Screen
+              name="EditFamilyMember"
+              component={EditFamilyMemberScreen}
+              options={{
+                headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 17,
+                },
+                title: "Editează date despre membrul familiei",
               }}
             />
             {/* <Stack.Screen name="CreateProfile" component={CreateProfileScreen} /> */}
