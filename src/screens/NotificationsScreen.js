@@ -91,6 +91,11 @@ function NotificationsScreen({ navigation }) {
         setReceivedFriendRequest(responseReceivedRequests);
       };
       getReceivedFriendRequests();
+
+      const interval = setInterval(() => {
+        getReceivedFriendRequests();
+      }, 10);
+      return () => clearInterval(interval);
     }, [friendRequestDeleted])
   );
 
