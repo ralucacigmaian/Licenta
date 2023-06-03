@@ -20,6 +20,8 @@ import { Interests } from "../utils/interests";
 import { Colors } from "../utils/colors";
 import AddedFriendCard from "../components/AddedFriendCard";
 import { useFocusEffect } from "@react-navigation/native";
+import SearchBarComponent from "../components/SearchBarComponent";
+import LottieView from "lottie-react-native";
 
 function FriendRecommendationScreen({ navigation }) {
   const [usersArray, setUsersArray] = useState([]);
@@ -98,139 +100,497 @@ function FriendRecommendationScreen({ navigation }) {
       !friendsArray.some((z) => z.id === x.id)
   );
 
+  const [searchInput, setSearchInput] = useState("");
+  const [searchUsersArray, setSearchUsersArray] = useState([]);
+  const [searchFamilyArray, setSearchFamilyArray] = useState([]);
+  const [searchFriendsArray, setSearchFriendsArray] = useState([]);
+  const [searchStatus, setSearchStatus] = useState(false);
+
+  const handleSearchInput = useCallback((text) => {
+    setSearchInput(text);
+
+    if (text === "") {
+      setSearchUsersArray([]);
+      setSearchFamilyArray([]);
+      setSearchFriendsArray([]);
+      setSearchStatus(false);
+      return;
+    }
+
+    const searchedUsers = filteredUsersArray.filter((user) =>
+      user.name.toLowerCase().includes(text.toLowerCase())
+    );
+
+    setSearchUsersArray(searchedUsers);
+
+    const searchedFamily = familyArray.filter((familyMember) =>
+      familyMember.name.toLowerCase().includes(text.toLowerCase())
+    );
+
+    setSearchFamilyArray(searchedFamily);
+
+    const searchedFriends = friendsArray.filter((friend) =>
+      friend.name.toLowerCase().includes(text.toLowerCase())
+    );
+
+    setSearchFriendsArray(searchedFriends);
+
+    const hasSearchResults =
+      searchedUsers.length + searchedFamily.length + searchedFriends.length;
+
+    setSearchStatus(hasSearchResults);
+  });
+
+  console.log(searchStatus);
+
   if (loading) return <ActivityIndicator />;
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.containerFamily}>
-        <Text style={styles.textFamily}>Familie</Text>
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-          {familyArray.length > 0 ? (
-            familyArray.map((x) => {
-              return (
-                <View style={styles.containerCardFamily}>
-                  <AddedFriendCard
-                    image={x.image}
-                    name={x.name}
-                    birthday={x.birthday}
-                    onPress={() =>
-                      navigation.navigate("Profilul Prietenului", {
-                        name: x.name,
-                        familyRelation: x.familyRelation,
-                        birthday: x.birthday,
-                        image: x.image,
-                        interests: x.interests,
-                        phoneNumber: x.phoneNumber,
-                        idUser: authenticatedUser.uid,
-                        idFriend: x.id,
-                        isGift: true,
-                      })
-                    }
-                    onGift={() =>
-                      navigation.navigate("Display Gift Suggestions", {
-                        idFriend: x.id,
-                        name: x.name,
-                      })
-                    }
-                  />
-                </View>
-              );
-            })
-          ) : (
-            <Text style={styles.textNoFamily}>
-              Nu ai adăugat membrii familiei încă!
-            </Text>
-          )}
-        </ScrollView>
+  if (searchStatus === false) {
+    return (
+      <View style={styles.container}>
+        <SearchBarComponent
+          placeholder="Caută în lista de contacte"
+          value={searchInput}
+          onChangeText={handleSearchInput}
+        />
+        <View>
+          <View style={styles.containerFamily}>
+            <Text style={styles.textFamily}>Familie</Text>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+            >
+              {familyArray.length > 0 ? (
+                familyArray.map((x) => {
+                  return (
+                    <View style={styles.containerCardFamily}>
+                      <AddedFriendCard
+                        image={x.image}
+                        name={x.name}
+                        birthday={x.birthday}
+                        onPress={() =>
+                          navigation.navigate("Profilul Prietenului", {
+                            name: x.name,
+                            familyRelation: x.familyRelation,
+                            birthday: x.birthday,
+                            image: x.image,
+                            interests: x.interests,
+                            phoneNumber: x.phoneNumber,
+                            idUser: authenticatedUser.uid,
+                            idFriend: x.id,
+                            isGift: true,
+                          })
+                        }
+                        onGift={() =>
+                          navigation.navigate("Display Gift Suggestions", {
+                            idFriend: x.id,
+                            name: x.name,
+                          })
+                        }
+                      />
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={styles.textNoFamily}>
+                  Nu ai adăugat membrii familiei încă!
+                </Text>
+              )}
+            </ScrollView>
+          </View>
+          <View style={styles.containerAddedFriends}>
+            <Text style={styles.textAddedFriends}>Prieteni</Text>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+            >
+              {friendsArray.length > 0 ? (
+                friendsArray.map((x) => {
+                  // if (x.receivedGift === 0) {
+                  return (
+                    <View style={styles.containerCardAddedFriend}>
+                      <AddedFriendCard
+                        image={x.image}
+                        name={x.name}
+                        birthday={x.birthday}
+                        onPress={() =>
+                          navigation.navigate("Profilul Prietenului", {
+                            name: x.name,
+                            email: x.email,
+                            birthday: x.birthday,
+                            image: x.image,
+                            interests: x.interests,
+                            phoneNumber: x.phoneNumber,
+                            idUser: authenticatedUser.uid,
+                            idFriend: x.id,
+                            isGift: true,
+                          })
+                        }
+                        onGift={() =>
+                          navigation.navigate("Display Gift Suggestions", {
+                            idFriend: x.id,
+                            name: x.name,
+                          })
+                        }
+                      />
+                    </View>
+                  );
+                  // }
+                })
+              ) : (
+                <Text style={styles.textNoFriendsAdded}>
+                  Nu ai adaugăt prieteni încă!
+                </Text>
+              )}
+            </ScrollView>
+          </View>
+          <View style={styles.containerFriends}>
+            <Text style={styles.textFriends}>Poate îi cunoști</Text>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+            >
+              {filteredUsersArray.length > 0 ? (
+                filteredUsersArray.map((x) => {
+                  const firstInterest = Interests.find(
+                    (obj) => obj.id === x.interests[0]
+                  );
+                  const secondInterest = Interests.find(
+                    (obj) => obj.id === x.interests[1]
+                  );
+                  // console.log(secondInterest);
+                  return (
+                    <View style={styles.containerCardFriend}>
+                      <FriendCard
+                        image={x.image}
+                        name={x.name}
+                        firstInterest={firstInterest.title}
+                        secondInterest={secondInterest.title}
+                        idFriend={x.id}
+                        onPress={() =>
+                          navigation.navigate("Profilul Prietenului", {
+                            name: x.name,
+                            email: x.email,
+                            birthday: x.birthday,
+                            image: x.image,
+                            interests: x.interests,
+                            phoneNumber: x.phoneNumber,
+                            idUser: authenticatedUser.uid,
+                            idFriend: x.id,
+                          })
+                        }
+                      />
+                    </View>
+                  );
+                })
+              ) : (
+                <Text style={styles.textNoFriends}>
+                  Nu există prieteni disponibili
+                </Text>
+              )}
+            </ScrollView>
+          </View>
+        </View>
       </View>
-      <View style={styles.containerAddedFriends}>
-        <Text style={styles.textAddedFriends}>Prieteni</Text>
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-          {friendsArray.length > 0 ? (
-            friendsArray.map((x) => {
-              // if (x.receivedGift === 0) {
-              return (
-                <View style={styles.containerCardAddedFriend}>
-                  <AddedFriendCard
-                    image={x.image}
-                    name={x.name}
-                    birthday={x.birthday}
-                    onPress={() =>
-                      navigation.navigate("Profilul Prietenului", {
-                        name: x.name,
-                        email: x.email,
-                        birthday: x.birthday,
-                        image: x.image,
-                        interests: x.interests,
-                        phoneNumber: x.phoneNumber,
-                        idUser: authenticatedUser.uid,
-                        idFriend: x.id,
-                        isGift: true,
-                      })
-                    }
-                    onGift={() =>
-                      navigation.navigate("Display Gift Suggestions", {
-                        idFriend: x.id,
-                        name: x.name,
-                      })
-                    }
-                  />
-                </View>
-              );
-              // }
-            })
-          ) : (
-            <Text style={styles.textNoFriendsAdded}>
-              Nu ai adaugăt prieteni încă!
+    );
+  } else {
+    if (searchStatus === 0) {
+      return (
+        <View style={styles.container}>
+          <SearchBarComponent
+            placeholder="Caută în lista de contacte"
+            value={searchInput}
+            onChangeText={handleSearchInput}
+          />
+          <View style={styles.containerNoResult}>
+            <Text style={styles.textNoResult}>
+              Ne pare rău, dar nu am găsit nicio înregistrare care să corespundă
+              căutării tale!
             </Text>
+            <LottieView
+              source={require("../utils/search_empty.json")}
+              autoPlay
+              loop
+              style={{
+                width: 300,
+                height: 300,
+              }}
+            />
+          </View>
+        </View>
+      );
+    } else {
+      if (searchStatus !== 0) {
+        return (
+          <View style={styles.container}>
+            <SearchBarComponent
+              placeholder="Caută în lista de contacte"
+              value={searchInput}
+              onChangeText={handleSearchInput}
+            />
+            {searchFamilyArray.length > 0 && (
+              <View style={styles.containerSearchedFamily}>
+                <Text style={styles.textFamily}>Familie</Text>
+                <ScrollView
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {searchFamilyArray.map((x) => {
+                    return (
+                      <View style={styles.containerCardFamily}>
+                        <AddedFriendCard
+                          image={x.image}
+                          name={x.name}
+                          birthday={x.birthday}
+                          onPress={() =>
+                            navigation.navigate("Profilul Prietenului", {
+                              name: x.name,
+                              familyRelation: x.familyRelation,
+                              birthday: x.birthday,
+                              image: x.image,
+                              interests: x.interests,
+                              phoneNumber: x.phoneNumber,
+                              idUser: authenticatedUser.uid,
+                              idFriend: x.id,
+                              isGift: true,
+                            })
+                          }
+                          onGift={() =>
+                            navigation.navigate("Display Gift Suggestions", {
+                              idFriend: x.id,
+                              name: x.name,
+                            })
+                          }
+                        />
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
+            {searchFriendsArray.length > 0 && (
+              <View style={styles.containerAddedFriends}>
+                <Text style={styles.textAddedFriends}>Prieteni</Text>
+                <ScrollView
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {searchFriendsArray.map((x) => {
+                    return (
+                      <View style={styles.containerCardAddedFriend}>
+                        <AddedFriendCard
+                          image={x.image}
+                          name={x.name}
+                          birthday={x.birthday}
+                          onPress={() =>
+                            navigation.navigate("Profilul Prietenului", {
+                              name: x.name,
+                              email: x.email,
+                              birthday: x.birthday,
+                              image: x.image,
+                              interests: x.interests,
+                              phoneNumber: x.phoneNumber,
+                              idUser: authenticatedUser.uid,
+                              idFriend: x.id,
+                              isGift: true,
+                            })
+                          }
+                          onGift={() =>
+                            navigation.navigate("Display Gift Suggestions", {
+                              idFriend: x.id,
+                              name: x.name,
+                            })
+                          }
+                        />
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
+            {searchUsersArray.length > 0 && (
+              <View>
+                <Text style={styles.textFriends}>Poate îi cunoști</Text>
+                <ScrollView
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                >
+                  {searchUsersArray.map((x) => {
+                    const firstInterest = Interests.find(
+                      (obj) => obj.id === x.interests[0]
+                    );
+                    const secondInterest = Interests.find(
+                      (obj) => obj.id === x.interests[1]
+                    );
+                    return (
+                      <View style={styles.containerCardFriend}>
+                        <FriendCard
+                          image={x.image}
+                          name={x.name}
+                          firstInterest={firstInterest.title}
+                          secondInterest={secondInterest.title}
+                          idFriend={x.id}
+                          onPress={() =>
+                            navigation.navigate("Profilul Prietenului", {
+                              name: x.name,
+                              email: x.email,
+                              birthday: x.birthday,
+                              image: x.image,
+                              interests: x.interests,
+                              phoneNumber: x.phoneNumber,
+                              idUser: authenticatedUser.uid,
+                              idFriend: x.id,
+                            })
+                          }
+                        />
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
+          </View>
+        );
+      }
+    }
+  }
+
+  // return (
+  // <View style={styles.container}>
+
+  {
+    /* {!searchStatus ? (
+       
+      ) : (
+        <>
+          {searchFamilyArray.length > 0 && (
+            <View style={styles.containerSearchedFamily}>
+              <Text style={styles.textFamily}>Familie</Text>
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+              >
+                {searchFamilyArray.map((x) => {
+                  return (
+                    <View style={styles.containerCardFamily}>
+                      <AddedFriendCard
+                        image={x.image}
+                        name={x.name}
+                        birthday={x.birthday}
+                        onPress={() =>
+                          navigation.navigate("Profilul Prietenului", {
+                            name: x.name,
+                            familyRelation: x.familyRelation,
+                            birthday: x.birthday,
+                            image: x.image,
+                            interests: x.interests,
+                            phoneNumber: x.phoneNumber,
+                            idUser: authenticatedUser.uid,
+                            idFriend: x.id,
+                            isGift: true,
+                          })
+                        }
+                        onGift={() =>
+                          navigation.navigate("Display Gift Suggestions", {
+                            idFriend: x.id,
+                            name: x.name,
+                          })
+                        }
+                      />
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
           )}
-        </ScrollView>
-      </View>
-      <View style={styles.containerFriends}>
-        <Text style={styles.textFriends}>Poate îi cunoști</Text>
-        <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-          {filteredUsersArray.length > 0 ? (
-            filteredUsersArray.map((x) => {
-              const firstInterest = Interests.find(
-                (obj) => obj.id === x.interests[0]
-              );
-              const secondInterest = Interests.find(
-                (obj) => obj.id === x.interests[1]
-              );
-              console.log(secondInterest);
-              return (
-                <View style={styles.containerCardFriend}>
-                  <FriendCard
-                    image={x.image}
-                    name={x.name}
-                    firstInterest={firstInterest.title}
-                    secondInterest={secondInterest.title}
-                    idFriend={x.id}
-                    onPress={() =>
-                      navigation.navigate("Profilul Prietenului", {
-                        name: x.name,
-                        email: x.email,
-                        birthday: x.birthday,
-                        image: x.image,
-                        interests: x.interests,
-                        phoneNumber: x.phoneNumber,
-                        idUser: authenticatedUser.uid,
-                        idFriend: x.id,
-                      })
-                    }
-                  />
-                </View>
-              );
-            })
-          ) : (
-            <Text style={styles.textNoFriends}>
-              Nu există prieteni disponibili
-            </Text>
+          {searchFriendsArray.length > 0 && (
+            <View style={styles.containerAddedFriends}>
+              <Text style={styles.textAddedFriends}>Prieteni</Text>
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+              >
+                {searchFriendsArray.map((x) => {
+                  return (
+                    <View style={styles.containerCardAddedFriend}>
+                      <AddedFriendCard
+                        image={x.image}
+                        name={x.name}
+                        birthday={x.birthday}
+                        onPress={() =>
+                          navigation.navigate("Profilul Prietenului", {
+                            name: x.name,
+                            email: x.email,
+                            birthday: x.birthday,
+                            image: x.image,
+                            interests: x.interests,
+                            phoneNumber: x.phoneNumber,
+                            idUser: authenticatedUser.uid,
+                            idFriend: x.id,
+                            isGift: true,
+                          })
+                        }
+                        onGift={() =>
+                          navigation.navigate("Display Gift Suggestions", {
+                            idFriend: x.id,
+                            name: x.name,
+                          })
+                        }
+                      />
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
           )}
-        </ScrollView>
-      </View>
-    </View>
-  );
+          {searchUsersArray.length > 0 && (
+            <View>
+              <Text style={styles.textFriends}>Poate îi cunoști</Text>
+              <ScrollView
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+              >
+                {searchUsersArray.map((x) => {
+                  const firstInterest = Interests.find(
+                    (obj) => obj.id === x.interests[0]
+                  );
+                  const secondInterest = Interests.find(
+                    (obj) => obj.id === x.interests[1]
+                  );
+                  return (
+                    <View style={styles.containerCardFriend}>
+                      <FriendCard
+                        image={x.image}
+                        name={x.name}
+                        firstInterest={firstInterest.title}
+                        secondInterest={secondInterest.title}
+                        idFriend={x.id}
+                        onPress={() =>
+                          navigation.navigate("Profilul Prietenului", {
+                            name: x.name,
+                            email: x.email,
+                            birthday: x.birthday,
+                            image: x.image,
+                            interests: x.interests,
+                            phoneNumber: x.phoneNumber,
+                            idUser: authenticatedUser.uid,
+                            idFriend: x.id,
+                          })
+                        }
+                      />
+                    </View>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
+        </>
+      )}
+    </View> */
+  }
+  {
+    /* ); */
+  }
 }
 
 const styles = StyleSheet.create({
@@ -293,6 +653,18 @@ const styles = StyleSheet.create({
   containerCardFamily: {
     marginLeft: 16,
     marginTop: 8,
+  },
+  containerNoResult: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  textNoResult: {
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 20,
+    color: Colors.colors.darkDustyPurple,
+    textAlign: "center",
   },
 });
 
