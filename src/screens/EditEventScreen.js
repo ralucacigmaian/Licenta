@@ -1,18 +1,30 @@
 import { View, Text, StyleSheet } from "react-native";
-import { useContext, useEffect, useState } from "react";
-import Input from "../components/Input";
 import { Colors } from "../utils/colors";
 import { SelectList } from "react-native-dropdown-select-list";
+import { useState, useEffect, useContext } from "react";
 import Icon, { Icons } from "../components/Icons";
+import Input from "../components/Input";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Button from "../components/Button";
-import { showMessage } from "react-native-flash-message";
-import { addEvent } from "../database/database";
+import { editEvent } from "../database/database";
 import { UserContext } from "../context/AuthContext";
+import { showMessage } from "react-native-flash-message";
 
-function AddEventScreen({ navigation, route }) {
+function EditEventScreen({ route, navigation }) {
+  const {
+    idEvent,
+    eventType,
+    name1,
+    name2,
+    eventDate,
+    eventHour,
+    eventLocation,
+    locationName,
+  } = route.params;
+
   const authenticatedUser = useContext(UserContext);
-  const [eventType, setEventType] = useState();
+
+  const [selectEventType, setSelectEventType] = useState(eventType);
   const [errorEventType, setErrorEventType] = useState(false);
   const dataEventType = [
     { key: "Botez", value: "     Botez" },
@@ -20,36 +32,28 @@ function AddEventScreen({ navigation, route }) {
     { key: "Nuntă", value: "     Nuntă" },
   ];
 
-  const [eventLocation, setEventLocation] = useState();
+  const selectedEventType = dataEventType.find((x) => x.key === eventType);
+
+  const [date, setDate] = useState(new Date());
+  const [eventDateToAdd, setEventDateToAdd] = useState();
+  const [selectEventDate, setSelectEventDate] = useState(eventDate);
+  const [selectEventHour, setSelectEventHour] = useState(eventHour);
+  const [selectEventLocation, setSelectEventLocation] = useState(eventLocation);
+  const [inputs, setInputs] = useState({
+    name1: name1,
+    name2: name2,
+  });
+
+  console.log(eventType);
+  console.log(`name1: ${inputs.name1}, name2: ${inputs.name2}`);
 
   useEffect(() => {
     if (route.params) {
-      const { locationName } = route.params;
-      setEventLocation(locationName);
+      setSelectEventLocation(locationName);
+      console.log(`The eventLocation from EditEventScreen: ${locationName}`);
     }
   }, [route.params]);
 
-  console.log(eventLocation);
-
-  const [inputs, setInputs] = useState({
-    name1: "",
-    name2: "",
-  });
-
-  const [errors, setErrors] = useState({});
-
-  const handleOnChange = (text, input) => {
-    setInputs((prevState) => ({ ...prevState, [input]: text }));
-  };
-
-  const handleError = (errorMessage, input) => {
-    setErrors((prevState) => ({ ...prevState, [input]: errorMessage }));
-  };
-
-  const [date, setDate] = useState(new Date());
-  const [eventDate, setEventDate] = useState("Selectați data evenimentului");
-  const [eventHour, setEventHour] = useState("Selectați ora evenimentului");
-  const [eventDateToAdd, setEventDateToAdd] = useState();
   const [showPicker, setShowPicker] = useState(false);
   const [showHourPicker, setShowHourPicker] = useState(false);
 
@@ -84,16 +88,17 @@ function AddEventScreen({ navigation, route }) {
     let newHour = `${auxDate.getHours() < 10 ? "0" : ""}${auxDate.getHours()}:${
       auxDate.getMinutes() < 10 ? "0" : ""
     }${auxDate.getMinutes()}`;
+
     console.log(newHour);
 
     if (showPicker) {
       toggleDatePicker();
-      setEventDate(newDate);
+      setSelectEventDate(newDate);
     }
 
     if (showHourPicker) {
       toggleHourPicker();
-      setEventHour(newHour);
+      setSelectEventHour(newHour);
     }
 
     setEventDateToAdd(auxDate);
@@ -103,43 +108,33 @@ function AddEventScreen({ navigation, route }) {
     setShowHourPicker(!showHourPicker);
   };
 
-  const submitForm = async (
-    eventType,
-    name1,
-    name2,
-    eventDate,
-    eventHour,
-    eventLocation
-  ) => {
+  const [errors, setErrors] = useState({});
+  const handleOnChange = (text, input) => {
+    setInputs((prevState) => ({ ...prevState, [input]: text }));
+  };
+
+  const handleError = (errorMessage, input) => {
+    setErrors((prevState) => ({ ...prevState, [input]: errorMessage }));
+  };
+
+  const submitEditEvent = async () => {
     let valid = true;
 
-    if (!eventType) {
-      valid = false;
-      setErrorEventType(true);
-      showMessage({
-        message: "Vă rugăm să selectați tipul evenimentului!",
-        icon: "warning",
-        style: { backgroundColor: Colors.colors.darkDustyPurple },
-        titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
-        textStyle: { fontFamily: "Montserrat-Regular", fontSize: 14 },
-      });
-    }
-
-    if (eventType === "Botez") {
+    if (selectEventType === "Botez") {
       if (!inputs.name1) {
         valid = false;
         handleError("Vă rugăm să introduceți numele!", "name1");
       }
     }
 
-    if (eventType === "Majorat") {
+    if (selectEventType === "Majorat") {
       if (!inputs.name1) {
         valid = false;
         handleError("Vă rugăm să introduceți numele!", "name1");
       }
     }
 
-    if (eventType === "Nuntă") {
+    if (selectEventType === "Nuntă") {
       if (!inputs.name1) {
         valid = false;
         handleError("Vă rugăm să introduceți numele!", "name1");
@@ -150,37 +145,26 @@ function AddEventScreen({ navigation, route }) {
       }
     }
 
-    if (eventDate === "Selectați data evenimentului") {
-      valid = false;
-      handleError("Vă rugăm să selectați data evenimentului!", "eventDate");
-    }
-
-    if (eventHour === "Selectați ora evenimentului") {
-      valid = false;
-      handleError("Vă rugăm să selectați ora evenimentului!", "eventHour");
-    }
-
-    if (!eventLocation) {
-      valid = false;
-      handleError(
-        "Vă rugăm să selectați locația evenimentului!",
-        "eventLocation"
-      );
+    if (selectEventType === "Botez" || selectEventType === "Majorat") {
+      inputs.name2 = "";
     }
 
     if (valid) {
-      const responseAddEvent = await addEvent(
-        authenticatedUser.uid,
-        eventType,
-        inputs.name1,
-        inputs.name2,
-        eventDateToAdd,
-        eventHour,
-        eventLocation
-      );
+      try {
+        const response = await editEvent(authenticatedUser.uid, idEvent, {
+          eventType: selectEventType,
+          name1: inputs.name1,
+          name2: inputs.name2,
+          eventDate: eventDateToAdd,
+          eventHour: selectEventHour,
+          eventLocation: selectEventLocation,
+        });
+      } catch (error) {
+        console.log(error);
+      }
       navigation.navigate("EventList");
       showMessage({
-        message: "Evenimentul a fost adăugat cu succes!",
+        message: "Evenimentul a fost editat cu succes!",
         icon: "info",
         style: { backgroundColor: Colors.colors.darkDustyPurple },
         titleStyle: { fontFamily: "Montserrat-Regular", fontSize: 16 },
@@ -192,14 +176,15 @@ function AddEventScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.containerForm}>
-        <Text style={styles.textHeader}>
-          Completează următorul formular pentru a adăuga un eveniment
+        <Text style={styles.textEdit}>
+          Completează următorul formular pentru a edita datele despre eveniment
         </Text>
-        <View style={styles.containerInputs}>
+        <View style={styles.containerInfomration}>
           <View style={styles.containerDropDown}>
             <Text style={styles.textDropDown}>Tipul evenimentului</Text>
             <SelectList
-              setSelected={setEventType}
+              defaultOption={selectedEventType}
+              setSelected={setSelectEventType}
               data={dataEventType}
               fontFamily="Montserrat-Regular"
               search={false}
@@ -230,8 +215,9 @@ function AddEventScreen({ navigation, route }) {
               onSelect={() => console.log(eventType)}
             />
           </View>
-          {eventType === "Botez" && (
+          {selectEventType === "Botez" && (
             <Input
+              value={inputs.name1}
               label="Numele botezatului"
               placeholder="Introduceți numele"
               backgroundColor="white"
@@ -242,7 +228,10 @@ function AddEventScreen({ navigation, route }) {
               iconError="ios-alert-circle"
               iconSize={28}
               iconColor={Colors.colors.darkDustyPurple}
-              style={{ fontFamily: "Montserrat-Regular" }}
+              style={{
+                fontFamily: "Montserrat-Regular",
+                color: Colors.colors.gray,
+              }}
               onChangeText={(text) => handleOnChange(text, "name1")}
               error={errors.name1}
               onFocus={() => {
@@ -250,8 +239,9 @@ function AddEventScreen({ navigation, route }) {
               }}
             />
           )}
-          {eventType === "Majorat" && (
+          {selectEventType === "Majorat" && (
             <Input
+              value={inputs.name1}
               label="Numele sărbătoritului"
               placeholder="Introduceți numele"
               backgroundColor="white"
@@ -262,7 +252,10 @@ function AddEventScreen({ navigation, route }) {
               iconError="ios-alert-circle"
               iconSize={28}
               iconColor={Colors.colors.darkDustyPurple}
-              style={{ fontFamily: "Montserrat-Regular" }}
+              style={{
+                fontFamily: "Montserrat-Regular",
+                color: Colors.colors.gray,
+              }}
               onChangeText={(text) => handleOnChange(text, "name1")}
               error={errors.name1}
               onFocus={() => {
@@ -270,9 +263,10 @@ function AddEventScreen({ navigation, route }) {
               }}
             />
           )}
-          {eventType === "Nuntă" && (
+          {selectEventType === "Nuntă" && (
             <View>
               <Input
+                value={inputs.name1}
                 label="Numele miresei"
                 placeholder="Introduceți numele"
                 backgroundColor="white"
@@ -283,7 +277,10 @@ function AddEventScreen({ navigation, route }) {
                 iconError="ios-alert-circle"
                 iconSize={28}
                 iconColor={Colors.colors.darkDustyPurple}
-                style={{ fontFamily: "Montserrat-Regular" }}
+                style={{
+                  fontFamily: "Montserrat-Regular",
+                  color: Colors.colors.gray,
+                }}
                 onChangeText={(text) => handleOnChange(text, "name1")}
                 error={errors.name1}
                 onFocus={() => {
@@ -291,6 +288,7 @@ function AddEventScreen({ navigation, route }) {
                 }}
               />
               <Input
+                value={inputs.name2}
                 label="Numele mirelui"
                 placeholder="Introduceți numele"
                 backgroundColor="white"
@@ -301,7 +299,10 @@ function AddEventScreen({ navigation, route }) {
                 iconError="ios-alert-circle"
                 iconSize={28}
                 iconColor={Colors.colors.darkDustyPurple}
-                style={{ fontFamily: "Montserrat-Regular" }}
+                style={{
+                  fontFamily: "Montserrat-Regular",
+                  color: Colors.colors.gray,
+                }}
                 onChangeText={(text) => handleOnChange(text, "name2")}
                 error={errors.name2}
                 onFocus={() => {
@@ -312,7 +313,7 @@ function AddEventScreen({ navigation, route }) {
           )}
           <Input
             label="Data evenimentului"
-            placeholder={eventDate}
+            placeholder={selectEventDate}
             placeholderTextColor={Colors.colors.gray}
             color={Colors.colors.darkDustyPurple}
             backgroundColor="white"
@@ -371,7 +372,7 @@ function AddEventScreen({ navigation, route }) {
           )}
           <Input
             label="Ora evenimentului"
-            placeholder={eventHour}
+            placeholder={selectEventHour}
             placeholderTextColor={Colors.colors.gray}
             color={Colors.colors.darkDustyPurple}
             backgroundColor="white"
@@ -434,9 +435,7 @@ function AddEventScreen({ navigation, route }) {
           )}
           <Input
             label="Locația evenimentului"
-            placeholder={
-              eventLocation ? eventLocation : "Selectați locația evenimentului"
-            }
+            placeholder={eventLocation ? eventLocation : selectEventLocation}
             placeholderTextColor={Colors.colors.gray}
             color={Colors.colors.darkDustyPurple}
             backgroundColor="white"
@@ -452,20 +451,18 @@ function AddEventScreen({ navigation, route }) {
               handleError(null, "eventLocation");
             }}
             caretHidden={true}
-            onPressIn={() => navigation.navigate("Map")}
+            onPressIn={() =>
+              navigation.navigate("Map", {
+                idEvent: idEvent,
+                eventType: selectEventType,
+                eventDate: selectEventDate,
+                eventHour: selectEventHour,
+              })
+            }
           />
           <View style={styles.containerButton}>
             <Button
-              onPress={() =>
-                submitForm(
-                  eventType,
-                  inputs.name1,
-                  inputs.name2,
-                  eventDateToAdd,
-                  eventHour,
-                  eventLocation
-                )
-              }
+              onPress={submitEditEvent}
               backgroundColor={Colors.colors.darkDustyPurple}
               color="white"
               width={280}
@@ -474,7 +471,7 @@ function AddEventScreen({ navigation, route }) {
               fontSize={16}
               shadowOpacity={0.5}
             >
-              Adaugă evenimentul
+              Editează evenimentul
             </Button>
           </View>
         </View>
@@ -494,28 +491,29 @@ const styles = StyleSheet.create({
     width: "90%",
     backgroundColor: Colors.colors.cardBackgroundColor,
     borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
   },
-  textHeader: {
+  textEdit: {
     fontFamily: "Montserrat-Regular",
     fontSize: 16,
     color: Colors.colors.darkDustyPurple,
-    marginTop: 16,
     textAlign: "center",
-  },
-  containerInputs: {
     marginTop: 16,
+    marginHorizontal: 16,
   },
-  containerDropDown: {
-    width: 280,
-    marginBottom: 16,
+  containerInfomration: {
+    marginTop: 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
   textDropDown: {
     fontFamily: "Montserrat-Regular",
     fontSize: 16,
     color: Colors.colors.darkDustyPurple,
     marginBottom: 4,
+  },
+  containerDropDown: {
+    width: 280,
+    marginBottom: 16,
   },
   containerDatePicker: {
     height: 120,
@@ -532,4 +530,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddEventScreen;
+export default EditEventScreen;

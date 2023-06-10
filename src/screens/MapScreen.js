@@ -6,7 +6,13 @@ import { Colors } from "../utils/colors";
 import Icon, { Icons } from "../components/Icons";
 import Button from "../components/Button";
 
-const MapScreen = ({ navigation }) => {
+const MapScreen = ({ navigation, route }) => {
+  const { idEvent, eventType, eventDate, eventHour } = route.params || {};
+
+  console.log(
+    `The idEvent from MapScreen: ${idEvent}\nThe eventType from MapScreen: ${eventType}`
+  );
+
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedLocationName, setSelectedLocationName] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -135,6 +141,18 @@ const MapScreen = ({ navigation }) => {
     setSelectedLocationName(location.name);
   };
 
+  const handleSelectLocation = () => {
+    const pageDestination = idEvent ? "EditEvent" : "Adaugă un eveniment";
+    const params = {
+      idEvent: idEvent,
+      locationName: selectedLocation.name,
+      eventType: eventType,
+      eventDate: eventDate,
+      eventHour: eventHour,
+    };
+    navigation.navigate(pageDestination, params);
+  };
+
   //   console.log(selectedLocation.name);
 
   return (
@@ -208,11 +226,7 @@ const MapScreen = ({ navigation }) => {
             fontFamily="Montserrat-Regular"
             fontSize={18}
             color="white"
-            onPress={() =>
-              navigation.navigate("Adaugă un eveniment", {
-                locationName: selectedLocation.name,
-              })
-            }
+            onPress={handleSelectLocation}
           >
             Selectează locația
           </Button>
