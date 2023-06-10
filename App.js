@@ -46,6 +46,10 @@ import EventsScreen from "./src/screens/EventsScreen";
 import AddEventScreen from "./src/screens/AddEventScreen";
 import MapScreen from "./src/screens/MapScreen";
 import EditFamilyMemberScreen from "./src/screens/EditFamilyMemberScreen";
+import CameraScreen from "./src/screens/CameraScreen";
+import PreviewMemoryScreen from "./src/screens/PreviewMemoryScreen";
+import DisplayMemoryScreen from "./src/screens/DisplayMemoryScreen";
+import EditEventScreen from "./src/screens/EditEventScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -653,6 +657,63 @@ export default function App() {
                   fontSize: 17,
                 },
                 title: "Editează date despre membrul familiei",
+              }}
+            />
+            <Stack.Screen
+              name="CameraScreen"
+              component={CameraScreen}
+              options={{
+                headerShown: true,
+                headerTransparent: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: "white",
+                title: null,
+              }}
+            />
+            <Stack.Screen
+              name="PreviewMemory"
+              component={PreviewMemoryScreen}
+              options={{
+                headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 20,
+                },
+                title: "Amintire nouă",
+              }}
+            />
+            <Stack.Screen
+              name="ViewMemory"
+              component={DisplayMemoryScreen}
+              options={{
+                headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 20,
+                },
+                title: "Vezi amintire",
+              }}
+            />
+            <Stack.Screen
+              name="EditEvent"
+              component={EditEventScreen}
+              options={{
+                headerShown: true,
+                headerLargeTitleShadowVisible: false,
+                headerBackTitleVisible: false,
+                headerTintColor: Colors.colors.darkDustyPurple,
+                headerTitleStyle: {
+                  fontFamily: "Montserrat-SemiBold",
+                  fontSize: 17,
+                },
+                title: "Editează date despre eveniment",
               }}
             />
             {/* <Stack.Screen name="CreateProfile" component={CreateProfileScreen} /> */}

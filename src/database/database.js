@@ -206,9 +206,26 @@ export async function addEvent(
     giftName: "noGiftName",
     giftPrice: 0,
     giftDate: "noGiftDate",
+    hasPassed: 0,
+    hasMemory: 0,
   });
   const eventId = response.data.name;
   return eventId;
+}
+
+export async function deleteEvent(idUser, idEvent) {
+  const response = await axios.delete(
+    URL + `/users/${idUser}/events/${idEvent}.json`
+  );
+  return response;
+}
+
+export async function editEvent(idUser, idEvent, eventData) {
+  const response = await axios.patch(
+    URL + `/users/${idUser}/events/${idEvent}.json`,
+    eventData
+  );
+  return response.data;
 }
 
 export async function getUsersEvents(idUser) {
@@ -226,6 +243,12 @@ export async function getUsersEvents(idUser) {
       name1: response.data[x].name1,
       name2: response.data[x].name2,
       receivedGift: response.data[x].receivedGift,
+      hasPassed: response.data[x].hasPassed,
+      hasMemory: response.data[x].hasMemory,
+      imageMemory:
+        response.data[x].hasMemory === 1
+          ? await getImageURL(`memories/${idUser}/${x}.jpeg`)
+          : null,
       id: x,
     };
     events.push(eventsRetrieved);
