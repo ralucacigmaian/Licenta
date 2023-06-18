@@ -384,7 +384,9 @@ function GiftDetailsScreen({ route, navigation }) {
       </Modal>
       <Image source={{ uri: image }} style={styles.image} />
       <View style={styles.containerDetails}>
-        <Text style={styles.textName}>{name}</Text>
+        <Text numberOfLines={3} style={styles.textName}>
+          {name}
+        </Text>
         <Pressable onPress={handleViewReviews}>
           <View style={styles.containerRating}>
             {handleRating()}

@@ -88,7 +88,23 @@ function EventsScreen() {
 
   console.log(searchStatus);
 
-  if (loading) return <ActivityIndicator />;
+  if (loading)
+    return (
+      <ActivityIndicator
+        size="large"
+        color={Colors.colors.darkDustyPurple}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "white",
+        }}
+      />
+    );
 
   if (searchStatus === false) {
     return (

@@ -11,6 +11,7 @@ import {
 import { firebase } from "app/config.js";
 import NotificationFriendRequest from "../components/NotificationFriendRequest";
 import { useFocusEffect } from "@react-navigation/native";
+import { Colors } from "../utils/colors";
 
 function NotificationsScreen({ navigation }) {
   const [usersArray, setUsersArray] = useState([]);
@@ -204,7 +205,23 @@ function NotificationsScreen({ navigation }) {
     setFriendRequestDeleted(!friendRequestDeleted);
   };
 
-  if (loading) return <ActivityIndicator />;
+  if (loading)
+    return (
+      <ActivityIndicator
+        size="large"
+        color={Colors.colors.darkDustyPurple}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "white",
+        }}
+      />
+    );
 
   return (
     <View style={styles.container}>
