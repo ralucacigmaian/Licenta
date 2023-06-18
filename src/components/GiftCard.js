@@ -17,70 +17,36 @@ const { width } = Dimensions.get("screen");
 
 function GiftCard({ image, name, price, description, onDetails }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [favourite, setFavourite] = useState(false);
+  // const [favourite, setFavourite] = useState(false);
+  // const rating = 5;
+
+  // const handleRating = () => {
+  //   const stars = [];
+  //   for (let i = 0; i < rating; i++) {
+  //     stars.push(
+  //       <Icon
+  //         type={Icons.AntDesign}
+  //         name="star"
+  //         size={16}
+  //         color={Colors.colors.darkDustyPurple}
+  //       />
+  //     );
+  //   }
+  //   return stars;
+  // };
 
   return (
-    // <Pressable onPress={() => setModalVisible(true)}>
-    //   <Modal visible={modalVisible} transparent={true} animationType="fade">
-    //     <SafeAreaView style={styles.modalContainer}>
-    //       <Pressable onPress={() => setModalVisible(false)}>
-    //         <View style={styles.modalView}>
-    //           <View style={styles.modalInformation}>
-    //             <View style={styles.modalImageContainer}>
-    //               <Image source={{ uri: image }} style={styles.modalImage} />
-    //             </View>
-    //             <Text style={styles.textModalName}>{name}</Text>
-    //             <Text style={styles.textModalDescription}>{description}</Text>
-    //             <Text style={styles.textModalPrice}>{price}$</Text>
-    //             <View style={styles.buttonModalCart}>
-    //               <Button
-    //                 backgroundColor={Colors.colors.darkDustyPurple}
-    //                 color="white"
-    //                 width={200}
-    //               >
-    //                 Add to cart
-    //               </Button>
-    //             </View>
-    //           </View>
-    //         </View>
-    //       </Pressable>
-    //     </SafeAreaView>
-    //   </Modal>
-    //   <View style={styles.container}>
-    //     <View style={styles.imageContainer}>
-    //       <Image source={{ uri: image }} style={styles.image} />
-    //     </View>
-    //     <View style={styles.informationContainer}>
-    //       <View style={styles.detailsContainer}>
-    //         <Text
-    //           numberOfLines={1}
-    //           ellipsizeMode="tail"
-    //           style={styles.textName}
-    //         >
-    //           {name}
-    //         </Text>
-    //         <Text style={styles.textPrice}>{price}$</Text>
-    //       </View>
-    //       <View style={styles.buttonContainer}>
-    //         <Button
-    //           backgroundColor={Colors.colors.darkDustyPurple}
-    //           color="white"
-    //           width={200}
-    //         >
-    //           Add to cart
-    //         </Button>
-    //       </View>
-    //     </View>
-    //   </View>
-    // </Pressable>
     <Pressable onPress={onDetails}>
       <View style={styles.container}>
         <View style={styles.containerImage}>
-          <Image style={styles.image} source={{ uri: image }} />
+          <Image source={{ uri: image }} style={styles.image} />
         </View>
         <View style={styles.containerName}>
-          <Text style={styles.textName}>{name}</Text>
+          <Text numberOfLines={1} style={styles.textName}>
+            {name}
+          </Text>
         </View>
+        {/* <View style={styles.containerRating}>{handleRating()}</View> */}
         <View style={styles.containerPrice}>
           <Text style={styles.textPrice}>{price} RON</Text>
         </View>
@@ -92,41 +58,36 @@ function GiftCard({ image, name, price, description, onDetails }) {
 const styles = StyleSheet.create({
   container: {
     width: 300,
-    height: 290,
+    width: 193.5,
+    height: 250,
     backgroundColor: Colors.colors.cardBackgroundColor,
-    borderRadius: 10,
-    marginRight: 20,
-    // flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    // borderColor: "black",
+    // borderWidth: 1,
+    borderRadius: 20,
+    marginBottom: 16,
   },
   containerImage: {
-    justifyContent: "center",
+    // justifyContent: "center",
     alignItems: "center",
   },
   containerName: {
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
+    marginTop: 4,
   },
   containerPrice: {
     justifyContent: "center",
     alignItems: "center",
+    // marginTop: 4,
   },
   imageContainer: {
-    marginLeft: 10,
     justifyContent: "center",
     alignItems: "center",
   },
   image: {
-    // width: "90%",
-    // height: 200,
-    // width: 250,
-    // height: "80%",
-    // borderRadius: 10,
-    height: 220,
-    width: width / 2,
-    padding: 10,
-    overflow: "hidden",
-    borderRadius: 10,
+    height: "80%",
+    width: "90%",
+    borderRadius: 20,
+    marginTop: 10,
   },
   informationContainer: {
     justifyContent: "center",
@@ -140,13 +101,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   textName: {
-    fontFamily: "Montserrat-SemiBold",
-    fontSize: 17,
+    fontFamily: "Montserrat-Regular",
+    fontSize: 14,
     color: Colors.colors.darkDustyPurple,
     textAlign: "center",
+    marginTop: -30,
+    marginHorizontal: 16,
   },
   textPrice: {
-    fontFamily: "Montserrat-Light",
+    fontFamily: "Montserrat-SemiBold",
     fontSize: 16,
     color: Colors.colors.darkDustyPurple,
   },
@@ -207,6 +170,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
+  },
+  containerRating: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: -10,
   },
 });
 

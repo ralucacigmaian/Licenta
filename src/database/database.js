@@ -507,3 +507,44 @@ export async function getUsersReceivedFriendRequests(idUser) {
   console.log(receivedFriendRequestDetails);
   return receivedFriendRequestDetails;
 }
+
+export async function addReview(
+  idUser,
+  giftIndex,
+  giftCode,
+  rating,
+  reviewDescription,
+  date
+) {
+  const response = await axios.post(URL + `/reviews.json`, {
+    idUser: idUser,
+    giftIndex: giftIndex,
+    giftCode: giftCode,
+    rating: rating,
+    reviewDescription: reviewDescription,
+    date: date,
+  });
+
+  const reviewId = response.data.name;
+
+  return reviewId;
+}
+
+export async function getReviews() {
+  const reviews = [];
+  const response = await axios.get(URL + `/reviews.json`);
+  for (const x in response.data) {
+    const reviewsRetrieved = {
+      idUser: response.data[x].idUser,
+      giftIndex: response.data[x].giftIndex,
+      giftCode: response.data[x].giftCode,
+      rating: response.data[x].rating,
+      reviewDescription: response.data[x].reviewDescription,
+      date: response.data[x].date,
+    };
+    reviews.push(reviewsRetrieved);
+  }
+  return reviews;
+}
+
+getReviews();

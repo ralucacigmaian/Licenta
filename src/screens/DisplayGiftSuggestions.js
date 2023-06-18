@@ -19,6 +19,8 @@ import GiftCard from "../components/GiftCard";
 import { Colors } from "../utils/colors";
 import Tag from "../components/Tag";
 import { Interests } from "../utils/interests";
+import SearchBarComponent from "../components/SearchBarComponent";
+import { confirmSetupIntent } from "@stripe/stripe-react-native";
 
 function DisplayGiftSuggestionsScreen({ navigation, route }) {
   const authenticatedUser = useContext(UserContext);
@@ -58,11 +60,17 @@ function DisplayGiftSuggestionsScreen({ navigation, route }) {
       const codesToFetch = ["I001", "I002", "I003"];
       for (let i = 0; i < formattedInterests.length; i++) {
         for (let j = 0; j < codesToFetch.length; j++) {
+          const code = codesToFetch[j];
+          const index = `I${(i + 1).toString().padStart(2, "0")}`;
           const giftSuggestions = await getGiftSuggestions(
             formattedInterests[i],
             codesToFetch[j]
           );
-          auxArray.push(giftSuggestions);
+          auxArray.push({
+            index: index,
+            code: code,
+            giftSuggestions: giftSuggestions,
+          });
         }
       }
       setLoadingGiftSuggestions(false);
@@ -71,178 +79,46 @@ function DisplayGiftSuggestionsScreen({ navigation, route }) {
     fetchData();
   }, [idFriend]);
 
+  if (loadingGiftSuggestions) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <ScrollView style={styles.container}>
       <SafeAreaView style={styles.container}>
+        <SearchBarComponent placeholder="Caută în lista de cadouri" />
         <View style={styles.header}>
           <Text style={styles.textHeader}>
             Alege cel mai bun cadou pentru {name}
           </Text>
         </View>
-        {interests.interests && interests.interests.includes(0) ? (
-          <View>
-            <Text style={styles.textGift}>🃏 Jocuri de cărți</Text>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={styles.horizontalContainer}
-            >
-              {gifts.slice(0, 3).map((x) => {
-                return (
-                  <GiftCard
-                    name={x.giftInformation.name}
-                    price={x.giftInformation.price}
-                    description={x.giftInformation.description}
-                    image={x.giftImage}
-                    onDetails={() =>
-                      navigation.navigate("Display Gift Details", {
-                        name: x.giftInformation.name,
-                        price: x.giftInformation.price,
-                        description: x.giftInformation.description,
-                        image: x.giftImage,
-                        userId: userId,
-                        friendId: idFriend,
-                        friendName: name,
-                      })
-                    }
-                  />
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
-        {interests.interests && interests.interests.includes(1) ? (
-          <View>
-            <Text style={styles.textGift}>🎮 Jocuri video</Text>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={styles.horizontalContainer}
-            >
-              {gifts.slice(3, 6).map((x) => {
-                return (
-                  <GiftCard
-                    name={x.giftInformation.name}
-                    price={x.giftInformation.price}
-                    description={x.giftInformation.description}
-                    image={x.giftImage}
-                    onDetails={() =>
-                      navigation.navigate("Display Gift Details", {
-                        name: x.giftInformation.name,
-                        price: x.giftInformation.price,
-                        description: x.giftInformation.description,
-                        image: x.giftImage,
-                        userId: userId,
-                        friendId: idFriend,
-                        friendName: name,
-                      })
-                    }
-                  />
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
-        {interests.interests && interests.interests.includes(2) ? (
-          <View>
-            <Text style={styles.textGift}>
-              🎶 Muzică & Festivaluri muzicale
-            </Text>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={styles.horizontalContainer}
-            >
-              {gifts.slice(6, 9).map((x) => {
-                return (
-                  <GiftCard
-                    name={x.giftInformation.name}
-                    price={x.giftInformation.price}
-                    description={x.giftInformation.description}
-                    image={x.giftImage}
-                    onDetails={() =>
-                      navigation.navigate("Display Gift Details", {
-                        name: x.giftInformation.name,
-                        price: x.giftInformation.price,
-                        description: x.giftInformation.description,
-                        image: x.giftImage,
-                        userId: userId,
-                        friendId: idFriend,
-                        friendName: name,
-                      })
-                    }
-                  />
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
-        {interests.interests && interests.interests.includes(3) ? (
-          <View>
-            <Text style={styles.textGift}>🎤 Interpretare vocală</Text>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={styles.horizontalContainer}
-            >
-              {gifts.slice(9, 12).map((x) => {
-                return (
-                  <GiftCard
-                    name={x.giftInformation.name}
-                    price={x.giftInformation.price}
-                    description={x.giftInformation.description}
-                    image={x.giftImage}
-                    onDetails={() =>
-                      navigation.navigate("Display Gift Details", {
-                        name: x.giftInformation.name,
-                        price: x.giftInformation.price,
-                        description: x.giftInformation.description,
-                        image: x.giftImage,
-                        userId: userId,
-                        friendId: idFriend,
-                        friendName: name,
-                      })
-                    }
-                  />
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
-        {interests.interests && interests.interests.includes(4) ? (
-          <View>
-            <Text style={styles.textGift}>
-              💄 Frumusețe & Îngrijire personală
-            </Text>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={styles.horizontalContainer}
-            >
-              {gifts.slice(12, 15).map((x) => {
-                return (
-                  <GiftCard
-                    name={x.giftInformation.name}
-                    price={x.giftInformation.price}
-                    description={x.giftInformation.description}
-                    image={x.giftImage}
-                    onDetails={() =>
-                      navigation.navigate("Display Gift Details", {
-                        name: x.giftInformation.name,
-                        price: x.giftInformation.price,
-                        description: x.giftInformation.description,
-                        image: x.giftImage,
-                        userId: userId,
-                        friendId: idFriend,
-                        friendName: name,
-                      })
-                    }
-                  />
-                );
-              })}
-            </ScrollView>
-          </View>
-        ) : null}
+        <View style={styles.containerGift}>
+          {gifts.length > 0 &&
+            gifts.map((x, index) => {
+              const { index: giftIndex, code, giftSuggestions } = x;
+              return (
+                <GiftCard
+                  key={index}
+                  image={giftSuggestions.giftImage}
+                  name={giftSuggestions.giftInformation.name}
+                  price={giftSuggestions.giftInformation.price}
+                  onDetails={() =>
+                    navigation.navigate("Display Gift Details", {
+                      name: giftSuggestions.giftInformation.name,
+                      price: giftSuggestions.giftInformation.price,
+                      description: giftSuggestions.giftInformation.description,
+                      image: giftSuggestions.giftImage,
+                      userId: userId,
+                      friendId: idFriend,
+                      friendName: name,
+                      giftIndex: giftIndex,
+                      giftCode: code,
+                    })
+                  }
+                />
+              );
+            })}
+        </View>
       </SafeAreaView>
     </ScrollView>
   );
@@ -254,11 +130,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   header: {
-    paddingLeft: 16,
+    marginLeft: 16,
   },
   textHeader: {
     fontFamily: "Montserrat-SemiBold",
-    fontSize: 28,
+    fontSize: 18,
     color: Colors.colors.darkDustyPurple,
   },
   textSubHeader: {
@@ -266,33 +142,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.colors.darkDustyPurple,
   },
-  loadingContainer: {
-    flex: 1,
-  },
-  giftContainer: {
-    paddingTop: 10,
-  },
-  giftsContainer: {
-    justifyContent: "center",
-    alignItems: "center",
+  containerGift: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    marginBottom: 16,
     marginTop: 16,
-  },
-  textGift: {
-    fontFamily: "Montserrat-SemiBoldItalic",
-    fontSize: 18,
-    color: Colors.colors.darkDustyPurple,
-    marginHorizontal: 16,
-    marginVertical: 16,
-  },
-  textTagContainer: {
-    fontFamily: "Montserrat-SemiBold",
-    fontSize: 18,
-    color: Colors.colors.darkDustyPurple,
-    marginHorizontal: 10,
-    marginVertical: 10,
-  },
-  horizontalContainer: {
-    paddingLeft: 10,
   },
 });
 
