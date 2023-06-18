@@ -1,6 +1,6 @@
 import { async } from "@firebase/util";
 import { isLoading } from "expo-font";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,8 @@ import { Colors } from "../utils/colors";
 import Tag from "../components/Tag";
 import { Interests } from "../utils/interests";
 import SearchBarComponent from "../components/SearchBarComponent";
-import { confirmSetupIntent } from "@stripe/stripe-react-native";
+import LottieView from "lottie-react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 function DisplayGiftSuggestionsScreen({ navigation, route }) {
   const authenticatedUser = useContext(UserContext);
@@ -79,49 +80,173 @@ function DisplayGiftSuggestionsScreen({ navigation, route }) {
     fetchData();
   }, [idFriend]);
 
+  const [searchInput, setSearchInput] = useState("");
+  const [searchGiftsArray, setSearchGiftsArray] = useState([]);
+  const [searchStatus, setSearchStatus] = useState(false);
+
+  const handleSearchInput = useCallback((text) => {
+    setSearchInput(text);
+
+    if (text === "") {
+      setSearchGiftsArray([]);
+      setSearchStatus(false);
+      return;
+    }
+
+    const searchedGifts = gifts.filter((gift) =>
+      gift.giftSuggestions.giftInformation.name
+        .toLowerCase()
+        .includes(text.toLowerCase())
+    );
+
+    setSearchGiftsArray(searchedGifts);
+
+    const hasSearchResults = searchedGifts.length;
+
+    setSearchStatus(hasSearchResults);
+  });
+
+  console.log(searchGiftsArray);
+
   if (loadingGiftSuggestions) {
-    return <ActivityIndicator />;
+    return (
+      <ActivityIndicator
+        size="large"
+        color={Colors.colors.darkDustyPurple}
+        style={{
+          position: "absolute",
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "white",
+        }}
+      />
+    );
   }
 
-  return (
-    <ScrollView style={styles.container}>
-      <SafeAreaView style={styles.container}>
-        <SearchBarComponent placeholder="Caută în lista de cadouri" />
-        <View style={styles.header}>
-          <Text style={styles.textHeader}>
-            Alege cel mai bun cadou pentru {name}
-          </Text>
+  if (searchStatus === false) {
+    return (
+      <ScrollView style={styles.container}>
+        <SafeAreaView style={styles.container}>
+          <SearchBarComponent
+            placeholder="Caută în lista de cadouri"
+            value={searchInput}
+            onChangeText={handleSearchInput}
+          />
+          <View style={styles.header}>
+            <Text style={styles.textHeader}>
+              Alege cel mai bun cadou pentru {name}
+            </Text>
+          </View>
+          <View style={styles.containerGift}>
+            {gifts.length > 0 &&
+              gifts.map((x, index) => {
+                const { index: giftIndex, code, giftSuggestions } = x;
+                return (
+                  <GiftCard
+                    key={index}
+                    image={giftSuggestions.giftImage}
+                    name={giftSuggestions.giftInformation.name}
+                    price={giftSuggestions.giftInformation.price}
+                    onDetails={() =>
+                      navigation.navigate("Display Gift Details", {
+                        name: giftSuggestions.giftInformation.name,
+                        price: giftSuggestions.giftInformation.price,
+                        description:
+                          giftSuggestions.giftInformation.description,
+                        image: giftSuggestions.giftImage,
+                        userId: userId,
+                        friendId: idFriend,
+                        friendName: name,
+                        giftIndex: giftIndex,
+                        giftCode: code,
+                      })
+                    }
+                  />
+                );
+              })}
+          </View>
+        </SafeAreaView>
+      </ScrollView>
+    );
+  } else {
+    if (searchStatus === 0) {
+      return (
+        <View style={styles.container}>
+          <SearchBarComponent
+            placeholder="Caută în lista de cadouri"
+            value={searchInput}
+            onChangeText={handleSearchInput}
+          />
+          <View style={styles.containerNoResult}>
+            <Text style={styles.textNoResult}>
+              Ne pare rău, dar nu am găsit nicio înregistrare care să corespundă
+              căutării tale!
+            </Text>
+            <LottieView
+              source={require("../utils/search_empty.json")}
+              autoPlay
+              loop
+              style={{
+                width: 300,
+                height: 300,
+              }}
+            />
+          </View>
         </View>
-        <View style={styles.containerGift}>
-          {gifts.length > 0 &&
-            gifts.map((x, index) => {
-              const { index: giftIndex, code, giftSuggestions } = x;
-              return (
-                <GiftCard
-                  key={index}
-                  image={giftSuggestions.giftImage}
-                  name={giftSuggestions.giftInformation.name}
-                  price={giftSuggestions.giftInformation.price}
-                  onDetails={() =>
-                    navigation.navigate("Display Gift Details", {
-                      name: giftSuggestions.giftInformation.name,
-                      price: giftSuggestions.giftInformation.price,
-                      description: giftSuggestions.giftInformation.description,
-                      image: giftSuggestions.giftImage,
-                      userId: userId,
-                      friendId: idFriend,
-                      friendName: name,
-                      giftIndex: giftIndex,
-                      giftCode: code,
-                    })
-                  }
-                />
-              );
-            })}
-        </View>
-      </SafeAreaView>
-    </ScrollView>
-  );
+      );
+    } else {
+      if (searchStatus !== 0) {
+        return (
+          <ScrollView style={styles.container}>
+            <View style={styles.container}>
+              <SearchBarComponent
+                placeholder="Caută în lista de evenimente"
+                value={searchInput}
+                onChangeText={handleSearchInput}
+              />
+              <View style={styles.header}>
+                <Text style={styles.textHeader}>
+                  Alege cel mai bun cadou pentru {name}
+                </Text>
+              </View>
+              <View style={styles.containerGift}>
+                {searchGiftsArray.length > 0 &&
+                  searchGiftsArray.map((x, index) => {
+                    const { index: giftIndex, code, giftSuggestions } = x;
+                    return (
+                      <GiftCard
+                        key={index}
+                        image={giftSuggestions.giftImage}
+                        name={giftSuggestions.giftInformation.name}
+                        price={giftSuggestions.giftInformation.price}
+                        onDetails={() =>
+                          navigation.navigate("Display Gift Details", {
+                            name: giftSuggestions.giftInformation.name,
+                            price: giftSuggestions.giftInformation.price,
+                            description:
+                              giftSuggestions.giftInformation.description,
+                            image: giftSuggestions.giftImage,
+                            userId: userId,
+                            friendId: idFriend,
+                            friendName: name,
+                            giftIndex: giftIndex,
+                            giftCode: code,
+                          })
+                        }
+                      />
+                    );
+                  })}
+              </View>
+            </View>
+          </ScrollView>
+        );
+      }
+    }
+  }
 }
 
 const styles = StyleSheet.create({
@@ -149,6 +274,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
     marginTop: 16,
+  },
+  containerNoResult: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    marginHorizontal: 16,
+  },
+  textNoResult: {
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 20,
+    color: Colors.colors.darkDustyPurple,
+    textAlign: "center",
   },
 });
 

@@ -330,6 +330,8 @@ function DisplayFriendsScreen({ navigation }) {
   if (loading)
     return (
       <ActivityIndicator
+        size="large"
+        color={Colors.colors.darkDustyPurple}
         style={{
           position: "absolute",
           left: 0,
