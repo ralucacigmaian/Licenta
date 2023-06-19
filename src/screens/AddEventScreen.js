@@ -7,7 +7,7 @@ import Icon, { Icons } from "../components/Icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Button from "../components/Button";
 import { showMessage } from "react-native-flash-message";
-import { addEvent } from "../database/database";
+import { addEvent, addNotificationEvent } from "../database/database";
 import { UserContext } from "../context/AuthContext";
 
 function AddEventScreen({ navigation, route }) {
@@ -176,6 +176,14 @@ function AddEventScreen({ navigation, route }) {
         inputs.name2,
         eventDateToAdd,
         eventHour,
+        eventLocation
+      );
+      const responseAddNotification = await addNotificationEvent(
+        authenticatedUser.uid,
+        eventType,
+        inputs.name1,
+        inputs.name2,
+        eventDateToAdd,
         eventLocation
       );
       navigation.navigate("EventList");

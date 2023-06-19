@@ -138,10 +138,14 @@ function NotificationsScreen({ navigation }) {
         phoneNumber
       );
       const responseAddNotification = await addNotification(
-        idFriend,
         idUser,
         name,
         birthday
+      );
+      const responseAddSecondNotification = await addNotification(
+        idFriend,
+        authenticatedUser.userName,
+        new Date(authenticatedUser.userBirthday)
       );
       const responseDeleteRequest = await deleteReceivedFriendRequest(idFriend);
       setFriendRequestDeleted(!friendRequestDeleted);
@@ -191,10 +195,14 @@ function NotificationsScreen({ navigation }) {
       })
     );
     const responseAddNotification = await addNotification(
-      idFriend,
       idUser,
       name,
       birthday
+    );
+    const responseAddSecondNotification = await addNotification(
+      idFriend,
+      authenticatedUser.userName,
+      new Date(authenticatedUser.userBirthday)
     );
     const responseDeleteRequest = await deleteReceivedFriendRequest(idFriend);
     setFriendRequestDeleted(!friendRequestDeleted);

@@ -14,7 +14,11 @@ import Input from "../components/Input";
 import { Colors } from "../utils/colors";
 import { firebase } from "app/config.js";
 import * as ImagePicker from "expo-image-picker";
-import { addImage, addFamilyMember } from "../database/database";
+import {
+  addImage,
+  addFamilyMember,
+  addNotificationFamilyMember,
+} from "../database/database";
 import { UserContext } from "../context/AuthContext";
 import Icon, { Icons } from "../components/Icons";
 import { showMessage } from "react-native-flash-message";
@@ -131,6 +135,12 @@ function AddFamilyMemberScreen({ navigation }) {
         selectFamilyRelation,
         phoneNumber,
         selectedInterests
+      );
+      const responseAddNotification = await addNotificationFamilyMember(
+        authenticatedUser.uid,
+        inputs.name,
+        selectFamilyRelation,
+        birthdateToAdd
       );
       const imagePath = `familyMembers/${authenticatedUser.uid}/${responseAddFamilyMember}.jpeg`;
       const responseImage = await addImage(photo, imagePath);

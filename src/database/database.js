@@ -375,16 +375,117 @@ export async function editImage(path, newPath) {
   return snap;
 }
 
-export async function addNotification(idUser, idFriend, name, birthday) {
+export async function addNotification(idUser, name, birthday) {
   const response = await axios.post(URL + `/notifications.json`, {
     idUser: idUser,
-    idFriend: idFriend,
     name: name,
     birthday: birthday,
+    toBeSent: 1,
   });
   const notificationId = response.data.name;
 
   return notificationId;
+}
+
+export async function addNotificationFamilyMember(
+  idUser,
+  name,
+  familyRelation,
+  birthday
+) {
+  const response = await axios.post(URL + `/notifications.json`, {
+    idUser: idUser,
+    name: name,
+    familyRelation: familyRelation,
+    birthday: birthday,
+    toBeSent: 1,
+  });
+
+  const notificationId = response.data.name;
+
+  return notificationId;
+}
+
+export async function addNotificationEvent(
+  idUser,
+  eventType,
+  name1,
+  name2,
+  eventDate,
+  eventLocation
+) {
+  const response = await axios.post(URL + `/notifications.json`, {
+    idUser: idUser,
+    eventType: eventType,
+    name1: name1,
+    name2: name2,
+    eventDate: eventDate,
+    eventLocation: eventLocation,
+    toBeSent: 1,
+  });
+
+  const notificationId = response.data.name;
+
+  return notificationId;
+}
+
+export async function editNotification(idUser, editToBeSent) {
+  const response = await axios.get(URL + `/notifications.json`);
+  if (response.data) {
+    const notifications = response.data;
+    const filtered = Object.entries(notifications).filter(function ([
+      key,
+      notification,
+    ]) {
+      return (
+        notification.idUser === idUser &&
+        notification.birthday &&
+        !notification.familyRelation
+      );
+    });
+    for (const [key, notification] of filtered) {
+      notification.toBeSent = editToBeSent;
+      await axios.patch(URL + `/notifications/${key}.json`, notification);
+    }
+  }
+}
+
+export async function editNotificationFamilyMember(idUser, editToBeSent) {
+  const response = await axios.get(URL + `/notifications.json`);
+  if (response.data) {
+    const notifications = response.data;
+    const filtered = Object.entries(notifications).filter(function ([
+      key,
+      notification,
+    ]) {
+      return (
+        notification.idUser === idUser &&
+        notification.birthday &&
+        notification.familyRelation
+      );
+    });
+    for (const [key, notification] of filtered) {
+      notification.toBeSent = editToBeSent;
+      await axios.patch(URL + `/notifications/${key}.json`, notification);
+    }
+  }
+}
+
+export async function editNotificationEvent(idUser, editToBeSent) {
+  const response = await axios.get(URL + `/notifications.json`);
+  if (response.data) {
+    const notifications = response.data;
+    const filtered = Object.entries(notifications).filter(function ([
+      key,
+      notification,
+    ]) {
+      return notification.idUser === idUser && notification.eventDate;
+    });
+    for (const [key, notification] of filtered) {
+      notification.toBeSent = editToBeSent;
+      await axios.patch(URL + `/notifications/${key}.json`, notification);
+    }
+  }
 }
 
 export async function deleteNotification(idNotification) {
@@ -408,9 +509,15 @@ export async function getUsersNotification(idUser) {
     });
     for (const key in filtered) {
       const notificationRetrieved = {
-        idFriend: filtered[key].idFriend,
-        name: filtered[key].name,
-        birthday: filtered[key].birthday,
+        name: filtered[key].name || null,
+        birthday: filtered[key].birthday || null,
+        familyRelation: filtered[key].familyRelation || null,
+        eventType: filtered[key].eventType || null,
+        name1: filtered[key].name1 || null,
+        name2: filtered[key].name2 || null,
+        eventDate: filtered[key].eventDate || null,
+        eventLocation: filtered[key].eventLocation || null,
+        toBeSent: filtered[key].toBeSent,
       };
       notificationDetails.push(notificationRetrieved);
     }

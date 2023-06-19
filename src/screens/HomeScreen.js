@@ -52,7 +52,12 @@ function HomeScreen({ navigation }) {
         if (snapshot.exists) {
           setUser(snapshot.data());
           const userName = snapshot.data();
+          const userBirthday = userName.birthdateToAdd;
+          const milliseconds =
+            userBirthday.seconds * 1000 + userBirthday.nanoseconds / 1000000;
+          const date = new Date(milliseconds);
           authenticatedUser.getUserName(userName.name);
+          authenticatedUser.getUserBirthday(date.toDateString());
         } else {
           console.log("User doesn't exist");
         }
@@ -84,52 +89,281 @@ function HomeScreen({ navigation }) {
   //   };
   // }, []);
 
-  useEffect(() => {
-    async function sendNotification() {
-      try {
-        let response = [];
-        response = await getUsersNotification(authenticatedUser.uid);
-        setNotification(response);
-        return response;
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    sendNotification().then((response) => {
-      for (const key in response) {
-        const birthdate = new Date(response[key].birthday);
-        const today = new Date();
-        let nextBirthday = new Date(
-          today.getFullYear(),
-          birthdate.getMonth(),
-          birthdate.getDate()
-        );
-        if (today > nextBirthday) {
-          nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
-        }
-        const diffTime = nextBirthday.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-        if (diffDays <= 7) {
-          scheduleNotification(
-            "Atenție! 🥳",
-            `Au mai rămas ${diffDays} zile până la aniversarea lui ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
-            13,
-            8
-          );
-        }
-        if (diffDays === 366) {
-          scheduleNotification(
-            "Atenție! 🎉",
-            `Astăzi este ziua prietenului tău, ${response[key].name}! Trimite-i un cadou!`,
-            20,
-            44
-          );
+  useFocusEffect(
+    useCallback(() => {
+      async function sendNotification() {
+        try {
+          let response = [];
+          response = await getUsersNotification(authenticatedUser.uid);
+          setNotification(response);
+          return response;
+        } catch (error) {
+          console.log(error);
         }
       }
-    });
-  }, []);
+
+      sendNotification().then((response) => {
+        for (const key in response) {
+          let birthdate;
+          if (response[key].birthday) {
+            birthdate = new Date(response[key].birthday);
+          } else {
+            if (response[key].eventType) {
+              birthdate = new Date(response[key].eventDate);
+            }
+          }
+          const today = new Date();
+          let nextBirthday = new Date(
+            today.getFullYear(),
+            birthdate.getMonth(),
+            birthdate.getDate()
+          );
+          if (today > nextBirthday) {
+            nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+          }
+          const diffTime = nextBirthday.getTime() - today.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (!response[key].familyRelation && response[key].toBeSent === 1) {
+            if (diffDays <= 7) {
+              scheduleNotification(
+                "Atenție! 🥳",
+                `Au mai rămas ${diffDays} zile până la aniversarea lui ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                15,
+                4
+              );
+            }
+            if (diffDays === 366) {
+              scheduleNotification(
+                "Atenție! 🎉",
+                `Astăzi este ziua prietenului tău, ${response[key].name}! Trimite-i un cadou!`,
+                15,
+                44
+              );
+            }
+          }
+
+          if (response[key].familyRelation && response[key].toBeSent === 1) {
+            if (diffDays <= 7) {
+              if (response[key].familyRelation === "Mamă") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Au mai rămas ${diffDays} zile până la aniversarea mamei tale, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Tată") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Au mai rămas ${diffDays} zile până la aniversarea tatălui tău, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Soră") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Au mai rămas ${diffDays} zile până la aniversarea surorii tale, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  16,
+                  4
+                );
+              }
+              if (response[key].familyRelation === "Frate") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Au mai rămas ${diffDays} zile până la aniversarea fratelui tău, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Bunică") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Au mai rămas ${diffDays} zile până la aniversarea bunicii tale, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Bunic") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Au mai rămas ${diffDays} zile până la aniversarea bunicului tău, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+            }
+            if (diffDays === 366) {
+              if (response[key].familyRelation === "Mamă") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Astăzi este ziua mamei tale, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Tată") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Astăzi este ziua tatălui tău, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Soră") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Astăzi este ziua surorii tale, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  16,
+                  4
+                );
+              }
+              if (response[key].familyRelation === "Frate") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Astăzi este ziua fratelui tău, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Bunică") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Astăzi este ziua bunicii tale, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+              if (response[key].familyRelation === "Bunic") {
+                scheduleNotification(
+                  "Atenție! 🥳",
+                  `Astăzi este ziua bunicului tău, ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+                  15,
+                  46
+                );
+              }
+            }
+          }
+
+          if (
+            response[key].eventType === "Botez" &&
+            response[key].toBeSent === 1
+          ) {
+            if (diffDays <= 7) {
+              scheduleNotification(
+                "Atenție! 🥳",
+                `Au mai rămas ${diffDays} zile până la botezul lui ${response[key].name1}!`,
+                16,
+                23
+              );
+            }
+            if (diffDays === 366) {
+              scheduleNotification(
+                "Atenție! 🥳",
+                `Astăzi este botezul lui ${response[key].name1} ce are loc la ${response[key].eventLocation}!`,
+                16,
+                23
+              );
+            }
+          }
+
+          if (
+            response[key].eventType === "Majorat" &&
+            response[key].toBeSent === 1
+          ) {
+            if (diffDays <= 7) {
+              scheduleNotification(
+                "Atenție! 🥳",
+                `Au mai rămas ${diffDays} zile până la majoratul lui ${response[key].name1}!`,
+                19,
+                17
+              );
+            }
+            if (diffDays == 366) {
+              scheduleNotification(
+                "Atenție! 🥳",
+                `Astăzi este majoratul lui ${response[key].name1} ce are loc la ${response[key].eventLocation}!`,
+                19,
+                22
+              );
+            }
+          }
+
+          if (
+            response[key].eventType === "Nuntă" &&
+            response[key].toBeSent === 1
+          ) {
+            if (diffDays <= 7) {
+              scheduleNotification(
+                "Atenție! 🥳",
+                `Au mai rămas ${diffDays} zile până la nunta lui ${response[key].name1} și ${response[key].name2}!`,
+                15,
+                46
+              );
+            }
+            if (diffDays === 366) {
+              scheduleNotification(
+                "Atenție! 🥳",
+                `Astăzi este nunta lui ${response[key].name1} și ${response[key].name2} ce are loc la ${response[key].eventLocation}!`,
+                19,
+                21
+              );
+            }
+          }
+        }
+      });
+    }, [])
+  );
+
+  console.log(notification);
+
+  // useEffect(() => {
+  //   async function sendNotification() {
+  //     try {
+  //       let response = [];
+  //       response = await getUsersNotification(authenticatedUser.uid);
+  //       setNotification(response);
+  //       return response;
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   }
+
+  //   sendNotification().then((response) => {
+  //     for (const key in response) {
+  //       const birthdate = new Date(response[key].birthday);
+  //       const today = new Date();
+  //       let nextBirthday = new Date(
+  //         today.getFullYear(),
+  //         birthdate.getMonth(),
+  //         birthdate.getDate()
+  //       );
+  //       if (today > nextBirthday) {
+  //         nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+  //       }
+  //       const diffTime = nextBirthday.getTime() - today.getTime();
+  //       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  //       if (diffDays <= 7) {
+  //         scheduleNotification(
+  //           "Atenție! 🥳",
+  //           `Au mai rămas ${diffDays} zile până la aniversarea lui ${response[key].name}! Grăbește-te să-i trimiți un cadou!`,
+  //           15,
+  //           46
+  //         );
+  //       }
+  //       if (diffDays === 366) {
+  //         scheduleNotification(
+  //           "Atenție! 🎉",
+  //           `Astăzi este ziua prietenului tău, ${response[key].name}! Trimite-i un cadou!`,
+  //           15,
+  //           44
+  //         );
+  //       }
+  //     }
+  //   });
+  // }, []);
 
   const [friends, setFriends] = useState();
   const [selectedCategory, setSelectedCategory] = useState("Toate");
