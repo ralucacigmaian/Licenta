@@ -28,30 +28,32 @@ function EventsScreen() {
     }, [])
   );
 
-  useEffect(() => {
-    const checkEvent = async () => {
-      const now = new Date();
-      const localOffset = now.getTimezoneOffset() * 60000;
-      const localNow = new Date(now - localOffset);
+  useFocusEffect(
+    useCallback(() => {
+      const checkEvent = async () => {
+        const now = new Date();
+        const localOffset = now.getTimezoneOffset() * 60000;
+        const localNow = new Date(now - localOffset);
 
-      for (const x of eventsArray) {
-        const eventDateTime = new Date(x.eventDate);
-        const eventTimePart = x.eventHour.split(":");
-        eventDateTime.setUTCHours(parseInt(eventTimePart[0], 10));
-        eventDateTime.setUTCMinutes(parseInt(eventTimePart[1], 10));
+        for (const x of eventsArray) {
+          const eventDateTime = new Date(x.eventDate);
+          const eventTimePart = x.eventHour.split(":");
+          eventDateTime.setUTCHours(parseInt(eventTimePart[0], 10));
+          eventDateTime.setUTCMinutes(parseInt(eventTimePart[1], 10));
 
-        if (eventDateTime < localNow) {
-          const response = await editEvent(authenticatedUser.uid, x.id, {
-            hasPassed: 1,
-          });
-          // console.log(`Event ${x.eventType}, ${x.name1}, ${x.name2} has passed`);
-        } else {
-          // console.log(`Event ${x.eventType}, ${x.name1}, ${x.name2} is upcoming`);
+          if (eventDateTime < localNow) {
+            const response = await editEvent(authenticatedUser.uid, x.id, {
+              hasPassed: 1,
+            });
+            // console.log(`Event ${x.eventType}, ${x.name1}, ${x.name2} has passed`);
+          } else {
+            // console.log(`Event ${x.eventType}, ${x.name1}, ${x.name2} is upcoming`);
+          }
         }
-      }
-    };
-    checkEvent();
-  }, [authenticatedUser.uid, eventsArray]);
+      };
+      checkEvent();
+    }, [authenticatedUser.uid, eventsArray])
+  );
 
   const handleDeleteEvent = async (idEvent) => {
     const response = await deleteEvent(authenticatedUser.uid, idEvent);
@@ -338,6 +340,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginTop: -600,
   },
   textNoEvents: {
     fontFamily: "Montserrat-SemiBold",

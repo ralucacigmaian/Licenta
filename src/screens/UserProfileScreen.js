@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,17 @@ import {
   Modal,
   SafeAreaView,
   TextInput,
+  Switch,
 } from "react-native";
 import { Colors } from "../utils/colors";
 import { firebase } from "app/config.js";
-import { addImage, getImageURL } from "../database/database";
+import {
+  addImage,
+  editNotification,
+  editNotificationEvent,
+  editNotificationFamilyMember,
+  getImageURL,
+} from "../database/database";
 import Icon, { Icons } from "../components/Icons";
 import * as ImagePicker from "expo-image-picker";
 import Option from "../components/Option";
@@ -20,6 +27,8 @@ import { UserContext } from "../context/AuthContext";
 import * as MailComposer from "expo-mail-composer";
 import Button from "../components/Button";
 import { showMessage } from "react-native-flash-message";
+import { useFocusEffect } from "@react-navigation/native";
+import { getUsersNotification } from "../database/database";
 
 function UserProfileScreen({ navigation, route }) {
   const { userId } = route.params;
@@ -73,6 +82,146 @@ function UserProfileScreen({ navigation, route }) {
     authenticatedUser.logout();
     firebase.auth().signOut();
   };
+
+  const [notificationFriends, setNotificationFriends] = useState([]);
+  const [notificationFamilyMembers, setNotificationFamilyMembers] = useState(
+    []
+  );
+  const [notificationEvents, setNotificationEvents] = useState([]);
+  const [notificationIsOpen, setNotificationIsOpen] = useState(false);
+
+  const [isSwitchFriendsOn, setIsSwitchFriendsOn] = useState();
+  const [isSwitchFamilyMembersOn, setIsSwitchFamilyMembersOn] = useState();
+  const [isSwitchEventsOn, setIsSwitchEventsOn] = useState();
+
+  useFocusEffect(
+    useCallback(() => {
+      async function sendNotification() {
+        try {
+          let response = [];
+          let auxFriendsArray = [];
+          let auxFamilyMembersArray = [];
+          let auxEventsArray = [];
+          response = await getUsersNotification(authenticatedUser.uid);
+          for (const key in response) {
+            if (
+              response[key].birthday !== null &&
+              response[key].familyRelation === null &&
+              response[key].name !== null &&
+              response[key].eventDate === null &&
+              response[key].eventLocation === null &&
+              response[key].eventType === null &&
+              response[key].name1 === null &&
+              response[key].name2 === null &&
+              response[key].toBeSent === 1
+            ) {
+              auxFriendsArray.push(response[key]);
+              setNotificationFriends(auxFriendsArray);
+            }
+            if (
+              response[key].birthday !== null &&
+              response[key].familyRelation !== null &&
+              response[key].name !== null &&
+              response[key].eventDate === null &&
+              response[key].eventLocation === null &&
+              response[key].eventType === null &&
+              response[key].name1 === null &&
+              response[key].name2 === null &&
+              response[key].toBeSent === 1
+            ) {
+              auxFamilyMembersArray.push(response[key]);
+              setNotificationFamilyMembers(auxFamilyMembersArray);
+            }
+            if (
+              (response[key].birthday === null &&
+                response[key].familyRelation === null &&
+                response[key].name === null &&
+                response[key].eventDate !== null &&
+                response[key].eventLocation !== null &&
+                response[key].eventType !== null &&
+                response[key].name1 !== null) ||
+              (response[key].name2 !== null && response[key].toBeSent === 1)
+            ) {
+              auxEventsArray.push(response[key]);
+              setNotificationEvents(auxEventsArray);
+            }
+          }
+          return response;
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
+      sendNotification();
+    }, [])
+  );
+
+  useEffect(() => {
+    setIsSwitchFriendsOn(notificationFriends.length > 0);
+  }, [notificationFriends]);
+
+  useEffect(() => {
+    setIsSwitchFamilyMembersOn(notificationFamilyMembers.length > 0);
+  }, [notificationFamilyMembers]);
+
+  useEffect(() => {
+    setIsSwitchEventsOn(notificationEvents.length > 0);
+  }, [notificationEvents]);
+
+  const handleSwitchPressFriends = async () => {
+    if (isSwitchFriendsOn) {
+      setIsSwitchFriendsOn(false);
+      const response = await editNotification(authenticatedUser.uid, 0);
+    }
+    if (!isSwitchFriendsOn) {
+      setIsSwitchFriendsOn(true);
+      const response = await editNotification(authenticatedUser.uid, 1);
+    }
+  };
+
+  const handleSwitchPressFamilyMembers = async () => {
+    if (isSwitchFamilyMembersOn) {
+      setIsSwitchFamilyMembersOn(false);
+      const response = await editNotificationFamilyMember(
+        authenticatedUser.uid,
+        0
+      );
+    }
+    if (!isSwitchFamilyMembersOn) {
+      setIsSwitchFamilyMembersOn(true);
+      const response = await editNotificationFamilyMember(
+        authenticatedUser.uid,
+        1
+      );
+    }
+  };
+
+  const handleSwitchPressEvents = async () => {
+    if (isSwitchEventsOn) {
+      setIsSwitchEventsOn(false);
+      const response = await editNotificationEvent(authenticatedUser.uid, 0);
+    }
+    if (!isSwitchEventsOn) {
+      setIsSwitchEventsOn(true);
+      const response = await editNotificationEvent(authenticatedUser.uid, 1);
+    }
+  };
+
+  // console.log(notificationFriends);
+  // console.log(notificationFamilyMembers);
+  // console.log(notificationEvents);
+
+  const handleNotificationIsOpen = () => {
+    setNotificationIsOpen(true);
+  };
+
+  // const handleSwitchPressFriends = () => {
+  //   if (notificationFriends.length > 0) {
+  //     setIsSwitchFriendsOn(true);
+  //   } else {
+  //     setIsSwitchFriendsOn(false);
+  //   }
+  // };
 
   // const handleDeleteAccount = () => {
   //   Alert.alert(
@@ -276,6 +425,71 @@ function UserProfileScreen({ navigation, route }) {
           </View>
         </SafeAreaView>
       </Modal>
+      <Modal
+        visible={notificationIsOpen}
+        transparent={true}
+        animationType="fade"
+      >
+        <SafeAreaView style={styles.containerModal}>
+          <View style={styles.modalView}>
+            <Pressable
+              style={({ pressed }) => pressed && styles.pressed}
+              onPress={() => setNotificationIsOpen(false)}
+            >
+              <Icon
+                type={Icons.Ionicons}
+                name="ios-close"
+                size={18}
+                color={Colors.colors.gray}
+              />
+            </Pressable>
+            <View style={styles.containerTriggerNotifications}>
+              <Text style={styles.textNotificationType}>
+                Selectează tipul de notificari dorite
+              </Text>
+              <View style={styles.containerNotificationType}>
+                <Text style={styles.textNotification}>
+                  Notificări pentru zilele de naștere ale prietenilor
+                </Text>
+                <Switch
+                  value={isSwitchFriendsOn}
+                  onValueChange={handleSwitchPressFriends}
+                  trackColor={{
+                    false: Colors.colors.gray,
+                    true: Colors.colors.darkDustyPurple,
+                  }}
+                />
+              </View>
+              <View style={styles.containerNotificationType}>
+                <Text style={styles.textNotification}>
+                  Notificări pentru zilele de naștere ale membriilor familiei
+                </Text>
+                <Switch
+                  value={isSwitchFamilyMembersOn}
+                  onValueChange={handleSwitchPressFamilyMembers}
+                  trackColor={{
+                    false: Colors.colors.gray,
+                    true: Colors.colors.darkDustyPurple,
+                  }}
+                />
+              </View>
+              <View style={styles.containerNotificationTypeEvent}>
+                <Text style={styles.textNotificationEvent}>
+                  Notificări pentru evenimente
+                </Text>
+                <Switch
+                  value={isSwitchEventsOn}
+                  onValueChange={handleSwitchPressEvents}
+                  trackColor={{
+                    false: Colors.colors.gray,
+                    true: Colors.colors.darkDustyPurple,
+                  }}
+                />
+              </View>
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
       <View style={styles.containerProfile}>
         <View style={styles.containerImage}>
           <Image source={{ uri: userPhoto }} style={styles.image} />
@@ -307,6 +521,7 @@ function UserProfileScreen({ navigation, route }) {
                 type={Icons.Octicons}
                 name="bell"
                 information="Notificări"
+                onPress={handleNotificationIsOpen}
               />
               {/* <Option information="Ajutor" /> */}
               <Option
@@ -462,6 +677,36 @@ const styles = StyleSheet.create({
   containerButtonProblem: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  textNotificationType: {
+    fontFamily: "Montserrat-SemiBold",
+    fontSize: 18,
+    color: Colors.colors.darkDustyPurple,
+    textAlign: "center",
+  },
+  containerNotificationType: {
+    marginTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+  },
+  textNotification: {
+    fontFamily: "Montserrat-Regular",
+    fontSize: 16,
+    color: Colors.colors.darkDustyPurple,
+    marginRight: 8,
+  },
+  containerNotificationTypeEvent: {
+    marginTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+  },
+  textNotificationEvent: {
+    fontFamily: "Montserrat-Regular",
+    fontSize: 16,
+    color: Colors.colors.darkDustyPurple,
+    marginRight: 72,
   },
 });
 

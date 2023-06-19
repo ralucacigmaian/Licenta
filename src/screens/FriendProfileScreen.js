@@ -230,10 +230,14 @@ function FriendProfileScreen({ route }) {
       );
       const responseDeleteRequest = await deleteReceivedFriendRequest(idFriend);
       const responseAddNotification = await addNotification(
-        idFriend,
         idUser,
         name,
         birthday
+      );
+      const responseAddSecondNotification = await addNotification(
+        idFriend,
+        authenticatedUser.userName,
+        new Date(authenticatedUser.userBirthday)
       );
       setFriendRequestDeleted(!friendRequestDeleted);
       navigation.navigate("Notifications");
@@ -279,11 +283,15 @@ function FriendProfileScreen({ route }) {
     );
     const responseDeleteRequest = await deleteReceivedFriendRequest(idFriend);
     const responseAddNotification = await addNotification(
-      idFriend,
       idUser,
       name,
       birthday
     );
+    // const responseAddSecondNotification = await addNotification(
+    //   idFriend,
+    //   authenticatedUser.userName,
+    //   new Date(authenticatedUser.userBirthday)
+    // );
     setFriendRequestDeleted(!friendRequestDeleted);
     navigation.navigate("Notifications");
   };
